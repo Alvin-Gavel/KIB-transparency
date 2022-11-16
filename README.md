@@ -1,19 +1,3 @@
-# Autotransparent
+This is a fork of Emmanuel Zavalis' repository `autotransparent`. It in turn makes use the `rtransparent` library by Stylianos Serghiou, which is described in more detail in https://doi.org/10.1371/journal.pbio.3001107.
 
-Trying to assess the transparency of research of a field or institution.
-
-The folders are structured as follows:
-- `Institutions` is where you'll find approaches to mapping institutional tranpsarency and code that may be more specific to those
--- `karolinska` has an in depth mapping of the institutional publications
-- `Fields` is where you'll find my previous attempts in mapping specific fields.
-
-To get the original raw data for a specific institution you use PubMed and perform a search with the filter `(pubmed pmc open access[filter])` before the query. Then you search `X[Affiliation]`. You then proceed in getting the output from PubMed as a `.csv` file which is needed to get the PMCs for downloading the data.
-
-The autotransparent.R file runs the regex to get the transparency assessment, whilst the jupyter notebooks are just used to shape the data into more workable dataframes and summaries.
-
-You can obviouslyt use this approach to any PubMed search to get the same information.
-
-
-
-
- 
+The purpose of the code in this repository is to allow estimating open science indicators. That is, whether an article shares data, shares code, discloses conflicts of interest, discloses funding and whether the protocol was preregistered.
