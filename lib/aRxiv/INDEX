@@ -1,6 +1,0 @@
-arxiv_cats              arXiv subject classifications
-arxiv_count             Count number of results for a given search
-arxiv_open              Open abstract for results of arXiv search
-arxiv_search            The main search function for aRxiv
-can_arxiv_connect       Check for connection to arXiv API
-query_terms             arXiv query field terms

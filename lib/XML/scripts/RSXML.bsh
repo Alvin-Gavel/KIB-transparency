@@ -1,4 +1,0 @@
-if test -n "-L/opt/R/arm64/lib -lxml2 -lz -L/opt/R/arm64/lib -llzma -lpthread -liconv -lm" ; then
- LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:-L/opt/R/arm64/lib -lxml2 -lz -L/opt/R/arm64/lib -llzma -lpthread -liconv -lm
- export LD_LIBRARY_PATH 
-fi

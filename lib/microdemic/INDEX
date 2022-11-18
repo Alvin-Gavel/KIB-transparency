@@ -1,6 +1,0 @@
-ma_abstract             Fetch abstracts
-ma_calchist             CalcHistogram API
-ma_evaluate             Evaluate API
-ma_interpret            Interpret API
-ma_search               Search - higher level method
-microdemic-package      microdemic

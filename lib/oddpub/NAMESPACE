@@ -1,5 +1,0 @@
-exportPattern("^[[:alpha:]]+")
-importFrom(magrittr,"%>%")
-importFrom(foreach,"%dopar%")
-import(dplyr)
-import(purrr)

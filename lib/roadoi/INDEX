@@ -1,5 +1,0 @@
-oadoi_fetch             Fetch open access status information and
-                        full-text links using Unpaywall
-oadoi_fetch_            Get open access status information.
-roadoi-package          R Client for the Unpaywall-API
-roadoi_addin            Find OA copies with RStudio addin
