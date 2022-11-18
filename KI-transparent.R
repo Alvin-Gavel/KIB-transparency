@@ -45,6 +45,7 @@ download_publication_data = function(loc){
   mapply(metareadr::mt_read_pmcoa,pmcid=pmcnumbers,file_name=filenames)
 }
 
+# This is currently unused, but I may put it back into use later
 checkdiff= function(loc){
   filelist <- list.files(paste0('./publications_',loc,'/'), pattern='*.xml', all.files=FALSE, full.names=FALSE)
   pmcnumbers = extract_pmcnumbers(loc)
@@ -57,7 +58,7 @@ evaluate_transparency=function(loc){
   filepath=paste0('./publications_',loc,'/')
   filelist <- as.list(list.files(filepath, pattern='*.xml', all.files=FALSE, full.names=FALSE))
   
-  filelist=paste0(filepath, filelist)       
+  filelist=paste0(filepath, filelist)
   cores <- detectCores()
   registerDoParallel(cores=cores)
   
