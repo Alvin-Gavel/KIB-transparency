@@ -53,7 +53,7 @@ checkdiff= function(loc){
   return(setdiff(pmcnumbers, downloaded))
 }
 
-dohooptyhoop=function(loc){
+evaluate_code_sharing=function(loc){
   filepath=paste0('./publications_',loc,'/')
   filelist <- as.list(list.files(filepath, pattern='*.xml', all.files=FALSE, full.names=FALSE))
   
@@ -67,7 +67,7 @@ dohooptyhoop=function(loc){
 }
 
 
-dohooptyhooprest=function(loc){
+evaluate_other_transparency_indicators=function(loc){
   filepath=paste0('./publications_',loc,'/')
   filelist <- as.list(list.files(filepath, pattern='*.xml', all.files=FALSE, full.names=FALSE))
   
@@ -90,10 +90,10 @@ for (ins in institutions){
 
   download_publication_data(ins)
 
-  code_df=dohooptyhoop(ins) 
+  code_df=evaluate_code_sharing(ins) 
   write.csv(code_df,paste0("./output/codesharing_",ins,".csv"), row.names = FALSE)
   
-  rest_df=dohooptyhooprest(ins) 
+  rest_df=evaluate_other_transparency_indicators(ins) 
   write.csv(rest_df,paste0("./output/resttransp_",ins,".csv"), row.names = FALSE)
 }
 
