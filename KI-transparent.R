@@ -61,23 +61,11 @@ evaluate_code_sharing=function(loc){
   cores <- detectCores()
   registerDoParallel(cores=cores)
   
-  return(foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{
-    rtransparent::rt_data_code_pmc(x)
-  })
-}
-
-
-evaluate_other_transparency_indicators=function(loc){
-  filepath=paste0('./publications_',loc,'/')
-  filelist <- as.list(list.files(filepath, pattern='*.xml', all.files=FALSE, full.names=FALSE))
+  code_df = foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_data_code_pmc(x)}
+  write.csv(code_df,paste0("./output/codesharing_",ins,".csv"), row.names = FALSE)
   
-  filelist=paste0(filepath, filelist)        
-  cores <- detectCores()
-  registerDoParallel(cores=cores)
-  
-  return(foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{
-    rtransparent::rt_all_pmc(x)
-  })
+  rest_df = foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_all_pmc(x)}
+  write.csv(rest_df,paste0("./output/resttransp_",ins,".csv"), row.names = FALSE)
 }
 rbind.fill()
 
@@ -87,13 +75,7 @@ institutions=c('umea','link','uppsala','orebro','gbg')
 dir.create(file.path(rootpath, 'output'), showWarnings = FALSE)
 for (ins in institutions){
   dir.create(file.path(rootpath, paste0('./publications_',ins)), showWarnings = FALSE)
-
   download_publication_data(ins)
-
-  code_df=evaluate_code_sharing(ins) 
-  write.csv(code_df,paste0("./output/codesharing_",ins,".csv"), row.names = FALSE)
-  
-  rest_df=evaluate_other_transparency_indicators(ins) 
-  write.csv(rest_df,paste0("./output/resttransp_",ins,".csv"), row.names = FALSE)
+  evaluate_code_sharing(ins)
 }
 
