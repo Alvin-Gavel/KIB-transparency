@@ -63,7 +63,10 @@ dohooptyhoop=function(loc){
   
   return(foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{
     rtransparent::rt_data_code_pmc(x)
-  })}
+  })
+}
+
+
 dohooptyhooprest=function(loc){
   filepath=paste0('./publications_',loc,'/')
   filelist <- as.list(list.files(filepath, pattern='*.xml', all.files=FALSE, full.names=FALSE))
@@ -74,32 +77,29 @@ dohooptyhooprest=function(loc){
   
   return(foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{
     rtransparent::rt_all_pmc(x)
-  })}
+  })
+}
 rbind.fill()
 
 rootpath = here::here()
 institutions=c('umea','link','uppsala','orebro','gbg')
 
 dir.create(file.path(rootpath, 'output'), showWarnings = FALSE)
-for (i in institutions){
-  dir.create(file.path(rootpath, paste0('./publications_',i)), showWarnings = FALSE)
+for (ins in institutions){
+  dir.create(file.path(rootpath, paste0('./publications_',ins)), showWarnings = FALSE)
 }
 
-for (i in institutions){
-  ins=checkdiff(i)
-  downloadspmc(ins,i)
-  mclapply(i,downloads)
+for (ins in institutions){
+  download_publication_data(ins)
 }
 
-for (i in institutions){
-  loc=i
-  code_df=dohooptyhoop(loc) 
-  write.csv(code_df,paste0("./output/codesharing_",loc,".csv"), row.names = FALSE)
+for (ins in institutions){
+  code_df=dohooptyhoop(ins) 
+  write.csv(code_df,paste0("./output/codesharing_",ins,".csv"), row.names = FALSE)
 }
 
-for (i in institutions){
-  loc=i
-  rest_df=dohooptyhooprest(loc) 
-  write.csv(rest_df,paste0("./output/resttransp_",loc,".csv"), row.names = FALSE)
+for (ins in institutions){
+  rest_df=dohooptyhooprest(ins) 
+  write.csv(rest_df,paste0("./output/resttransp_",ins,".csv"), row.names = FALSE)
 }
 
