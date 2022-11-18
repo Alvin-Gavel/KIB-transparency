@@ -32,9 +32,14 @@ extract_pmcnumbers = function(pmcidlist) {
   pmcnumber<-list()
     for (i in pmcidlist){
     go=str_replace(i,'PMC','')
-    pmcnumber=c(pmcnumber,go)
+    pmcnumbers=c(pmcnumber,go)
   }
-  return(pmcnumber)
+  return(pmcnumbers)
+}
+
+downloadspmc=function(pmcnumber,loc){
+  filenames=paste0('./publications_',loc, '/PMC',as.character(pmcnumber),'.xml')
+  mapply(metareadr::mt_read_pmcoa,pmcid=pmcnumber,file_name=filenames)
 }
 
 downloads = function(loc){
@@ -42,10 +47,8 @@ downloads = function(loc){
   pmcidlist<-read.delim(pmcidfilename, header = TRUE, sep=',')
   pmcidlist=pmcidlist$PMCID
 
-  pmcnumber = extract_pmcnumbers(pmcidlist)
-  
-  filenames=paste0('./publications_',loc, '/PMC',as.character(pmcnumber),'.xml')
-  mapply(metareadr::mt_read_pmcoa,pmcid=pmcnumber,file_name=filenames)
+  pmcnumbers = extract_pmcnumbers(pmcidlist)
+  downloadspmc(pmcnumber, loc)
 }
 
 checkdiff= function(loc){
@@ -53,15 +56,10 @@ checkdiff= function(loc){
   pmcidfilename=paste0("./pmcoalist_",loc,".csv")
   pmcidlist<-read.delim(pmcidfilename, header = TRUE, sep=',')
   pmcidlist=pmcidlist$PMCID
-  pmcnumber = extract_pmcnumbers(pmcidlist)
+  pmcnumbers = extract_pmcnumbers(pmcidlist)
   downloaded=str_remove(filelist,'PMC')
   downloaded=str_remove(downloaded,'.xml')
   return(setdiff(pmcnumber, downloaded))
-}
-
-downloadspmc=function(pmcnumber,loc){
-  filenames=paste0('./publications_',loc, '/PMC',as.character(pmcnumber),'.xml')
-  mapply(metareadr::mt_read_pmcoa,pmcid=pmcnumber,file_name=filenames)
 }
 
 dohooptyhoop=function(loc){
