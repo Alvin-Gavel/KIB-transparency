@@ -1,7 +1,0 @@
-Disease,is_coi_pred,is_register_pred,is_fund_pred,is_open_code,is_open_data
-Covid-19,89.2,0.0,77.6,25.3,24.3
-Dengue,100.0,0.0,100.0,34.3,37.1
-General (theoretical model),72.3,0.0,83.1,23.8,26.2
-Influenza illnesses,95.0,0.0,97.5,15.0,25.0
-Malaria,100.0,5.4,94.6,5.4,18.9
-Other,94.6,1.4,92.4,10.8,24.8

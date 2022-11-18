@@ -1,6 +1,0 @@
-Model,is_coi_pred,is_register_pred,is_fund_pred,is_open_code,is_open_data
-Agent-based,173,1,161,63,58
-Compartmental,419,0,405,104,103
-Multiple,23,0,20,4,6
-Spatiotemporal,263,3,247,52,84
-Time Series,319,2,276,65,81

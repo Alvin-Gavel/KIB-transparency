@@ -1,2 +1,0 @@
-# How to run this
-Run the paper.ipynb script from end to end and you will have all the numbers included in the paper. If you want you can also test out the rtransparent algorithm using the 'autotransparent.R' script which was the source of our transparency indicator data. The results will be sent to the results folder. The 'statistical analysis.R' includes everything needed for the fisher's exact tests and the multivariate logistic regression that we ran.
