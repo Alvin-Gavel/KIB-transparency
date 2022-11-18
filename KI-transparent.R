@@ -53,7 +53,7 @@ checkdiff= function(loc){
   return(setdiff(pmcnumbers, downloaded))
 }
 
-evaluate_code_sharing=function(loc){
+evaluate_transparency=function(loc){
   filepath=paste0('./publications_',loc,'/')
   filelist <- as.list(list.files(filepath, pattern='*.xml', all.files=FALSE, full.names=FALSE))
   
@@ -76,6 +76,6 @@ dir.create(file.path(rootpath, 'output'), showWarnings = FALSE)
 for (ins in institutions){
   dir.create(file.path(rootpath, paste0('./publications_',ins)), showWarnings = FALSE)
   download_publication_data(ins)
-  evaluate_code_sharing(ins)
+  evaluate_transparency(ins)
 }
 
