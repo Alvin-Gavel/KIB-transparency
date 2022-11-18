@@ -28,15 +28,21 @@
 
 rootpath = here::here()
 
-downloads= function(loc){
-  pmcidfilename=paste0("./pmcoalist_",loc,".csv")
-  pmcidlist<-read.delim(pmcidfilename, header = TRUE, sep=',')
-  pmcidlist=pmcidlist$PMCID
+extract_pmcnumbers = function(pmcidlist) {
   pmcnumber<-list()
-  for (i in pmcidlist){
+    for (i in pmcidlist){
     go=str_replace(i,'PMC','')
     pmcnumber=c(pmcnumber,go)
   }
+  return(pmcnumber)
+}
+
+downloads = function(loc){
+  pmcidfilename=paste0("./pmcoalist_",loc,".csv")
+  pmcidlist<-read.delim(pmcidfilename, header = TRUE, sep=',')
+  pmcidlist=pmcidlist$PMCID
+
+  pmcnumber = extract_pmcnumbers(pmcidlist)
   
   filenames=paste0('./publications_',loc, '/PMC',as.character(pmcnumber),'.xml')
   mapply(metareadr::mt_read_pmcoa,pmcid=pmcnumber,file_name=filenames)
@@ -47,14 +53,10 @@ checkdiff= function(loc){
   pmcidfilename=paste0("./pmcoalist_",loc,".csv")
   pmcidlist<-read.delim(pmcidfilename, header = TRUE, sep=',')
   pmcidlist=pmcidlist$PMCID
-  pmcnumber<-list()
-  for (i in pmcidlist){
-    go=str_replace(i,'PMC','')
-    pmcnumber=c(pmcnumber,go)}
+  pmcnumber = extract_pmcnumbers(pmcidlist)
   downloaded=str_remove(filelist,'PMC')
   downloaded=str_remove(downloaded,'.xml')
   return(setdiff(pmcnumber, downloaded))
-  
 }
 
 downloadspmc=function(pmcnumber,loc){
@@ -89,7 +91,6 @@ rbind.fill()
 institutions=c('umea','link','uppsala','orebro','gbg')
 
 for (i in institutions){
-  print(i)
   ins=checkdiff(i)
   downloadspmc(ins,i)
   mclapply(i,downloads)
