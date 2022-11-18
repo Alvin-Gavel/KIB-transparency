@@ -26,37 +26,32 @@
   library(reshape2)
 }
 
-extract_pmcnumbers = function(pmcidlist) {
-  pmcnumber<-list()
-    for (i in pmcidlist){
+extract_pmcnumbers = function(loc) {
+  pmcidfilename=paste0("./pmcoalist_",loc,".csv")
+  pmcidlist<-read.delim(pmcidfilename, header = TRUE, sep=',')
+  pmcidlist=pmcidlist$PMCID
+  
+  pmcnumbers<-list()
+  for (i in pmcidlist){
     go=str_replace(i,'PMC','')
-    pmcnumbers=c(pmcnumber,go)
+    pmcnumbers=c(pmcnumbers,go)
   }
   return(pmcnumbers)
 }
 
-make_pmcidlist = function(loc) {
-  pmcidfilename=paste0("./pmcoalist_",loc,".csv")
-  pmcidlist<-read.delim(pmcidfilename, header = TRUE, sep=',')
-  pmcidlist=pmcidlist$PMCID
-  return(pmcidlist)
-}
-
-downloadspmc=function(pmcnumber,loc){
-  filenames=paste0('./publications_',loc, '/PMC',as.character(pmcnumber),'.xml')
-  mapply(metareadr::mt_read_pmcoa,pmcid=pmcnumber,file_name=filenames)
+downloadspmc=function(pmcnumbers,loc){
+  filenames=paste0('./publications_',loc, '/PMC',as.character(pmcnumbers),'.xml')
+  mapply(metareadr::mt_read_pmcoa,pmcid=pmcnumbers,file_name=filenames)
 }
 
 downloads = function(loc){
-  pmcidlist = make_pmcidlist(loc)
-  pmcnumbers = extract_pmcnumbers(pmcidlist)
+  pmcnumbers = extract_pmcnumbers(loc)
   downloadspmc(pmcnumbers, loc)
 }
 
 checkdiff= function(loc){
   filelist <- list.files(paste0('./publications_',loc,'/'), pattern='*.xml', all.files=FALSE, full.names=FALSE)
-  pmcidlist = make_pmcidlist(loc)
-  pmcnumbers = extract_pmcnumbers(pmcidlist)
+  pmcnumbers = extract_pmcnumbers(loc)
   downloaded=str_remove(filelist,'PMC')
   downloaded=str_remove(downloaded,'.xml')
   return(setdiff(pmcnumbers, downloaded))
@@ -91,7 +86,6 @@ institutions=c('umea','link','uppsala','orebro','gbg')
 
 dir.create(file.path(rootpath, 'output'), showWarnings = FALSE)
 for (i in institutions){
-  print(i)
   dir.create(file.path(rootpath, paste0('./publications_',i)), showWarnings = FALSE)
 }
 
