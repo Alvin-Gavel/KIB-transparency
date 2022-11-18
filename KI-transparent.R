@@ -69,7 +69,7 @@ evaluate_transparency=function(loc){
 rbind.fill()
 
 rootpath = here::here()
-institutions=c('umea','link','uppsala','orebro','gbg','lund')#,'ki')
+institutions=c('umea','link','uppsala','orebro','gbg','lund','ki')
 
 dir.create(file.path(rootpath, 'output'), showWarnings = FALSE)
 for (ins in institutions){
