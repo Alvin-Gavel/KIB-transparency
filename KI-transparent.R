@@ -39,19 +39,26 @@ extract_pmcnumbers = function(loc) {
   return(pmcnumbers)
 }
 
-download_publication_data = function(loc){
-  pmcnumbers = extract_pmcnumbers(loc)
-  filenames=paste0('./publications_',loc, '/PMC',as.character(pmcnumbers),'.xml')
-  mapply(metareadr::mt_read_pmcoa,pmcid=pmcnumbers,file_name=filenames)
-}
-
 # This is currently unused, but I may put it back into use later
-checkdiff= function(loc){
-  filelist <- list.files(paste0('./publications_',loc,'/'), pattern='*.xml', all.files=FALSE, full.names=FALSE)
+checkdiff = function(loc, pmcnumbers){
+  
   pmcnumbers = extract_pmcnumbers(loc)
   downloaded=str_remove(filelist,'PMC')
   downloaded=str_remove(downloaded,'.xml')
   return(setdiff(pmcnumbers, downloaded))
+}
+
+download_publication_data = function(loc){
+  pmcnumbers = extract_pmcnumbers(loc)
+  already_downloaded <- list.files(paste0('./publications_',loc,'/'), pattern='*.xml', all.files=FALSE, full.names=FALSE)
+  already_downloaded=str_remove(already_downloaded,'PMC')
+  already_downloaded=str_remove(already_downloaded,'.xml')
+  remaining = setdiff(pmcnumbers, already_downloaded)
+  
+  if (length(remaining) > 0) {
+    filenames=paste0('./publications_',loc, '/PMC',as.character(remaining),'.xml')
+    mapply(metareadr::mt_read_pmcoa,pmcid=pmcnumbers,file_name=filenames)
+  }
 }
 
 evaluate_transparency=function(loc){
@@ -71,7 +78,7 @@ evaluate_transparency=function(loc){
 rbind.fill()
 
 rootpath = here::here()
-institutions=c('umea','link','uppsala','orebro','gbg')
+institutions=c('umea','link','uppsala','orebro','gbg','lund')#,'ki')
 
 dir.create(file.path(rootpath, 'output'), showWarnings = FALSE)
 for (ins in institutions){
