@@ -26,8 +26,8 @@
   library(reshape2)
 }
 
-extract_pmcnumbers = function(loc) {
-  pmcidfilename=paste0("./pmcoalist_",loc,".csv")
+extract_pmcnumbers = function(ins) {
+  pmcidfilename=paste0("./pmcoalist_",ins,".csv")
   pmcidlist<-read.delim(pmcidfilename, header = TRUE, sep=',')
   pmcidlist=pmcidlist$PMCID
   
@@ -39,21 +39,21 @@ extract_pmcnumbers = function(loc) {
   return(pmcnumbers)
 }
 
-download_publication_data = function(loc){
-  pmcnumbers = extract_pmcnumbers(loc)
-  already_downloaded <- list.files(paste0('./publications_',loc,'/'), pattern='*.xml', all.files=FALSE, full.names=FALSE)
+download_publication_data = function(ins){
+  pmcnumbers = extract_pmcnumbers(ins)
+  already_downloaded <- list.files(paste0('./publications_',ins,'/'), pattern='*.xml', all.files=FALSE, full.names=FALSE)
   already_downloaded=str_remove(already_downloaded,'PMC')
   already_downloaded=str_remove(already_downloaded,'.xml')
   remaining = setdiff(pmcnumbers, already_downloaded)
   
   if (length(remaining) > 0) {
-    filenames=paste0('./publications_',loc, '/PMC',as.character(remaining),'.xml')
+    filenames=paste0('./publications_',ins, '/PMC',as.character(remaining),'.xml')
     mapply(metareadr::mt_read_pmcoa,pmcid=pmcnumbers,file_name=filenames)
   }
 }
 
-evaluate_transparency=function(loc){
-  filepath=paste0('./publications_',loc,'/')
+evaluate_transparency=function(ins){
+  filepath=paste0('./publications_',ins,'/')
   filelist <- as.list(list.files(filepath, pattern='*.xml', all.files=FALSE, full.names=FALSE))
   
   filelist=paste0(filepath, filelist)
