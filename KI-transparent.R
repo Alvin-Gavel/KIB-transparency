@@ -26,8 +26,6 @@
   library(reshape2)
 }
 
-rootpath = here::here()
-
 extract_pmcnumbers = function(pmcidlist) {
   pmcnumber<-list()
     for (i in pmcidlist){
@@ -88,7 +86,14 @@ dohooptyhooprest=function(loc){
   })}
 rbind.fill()
 
+rootpath = here::here()
 institutions=c('umea','link','uppsala','orebro','gbg')
+
+dir.create(file.path(rootpath, 'output'), showWarnings = FALSE)
+for (i in institutions){
+  print(i)
+  dir.create(file.path(rootpath, paste0('./publications_',i)), showWarnings = FALSE)
+}
 
 for (i in institutions){
   ins=checkdiff(i)
