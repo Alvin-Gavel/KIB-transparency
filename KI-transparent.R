@@ -87,18 +87,12 @@ institutions=c('umea','link','uppsala','orebro','gbg')
 dir.create(file.path(rootpath, 'output'), showWarnings = FALSE)
 for (ins in institutions){
   dir.create(file.path(rootpath, paste0('./publications_',ins)), showWarnings = FALSE)
-}
 
-for (ins in institutions){
   download_publication_data(ins)
-}
 
-for (ins in institutions){
   code_df=dohooptyhoop(ins) 
   write.csv(code_df,paste0("./output/codesharing_",ins,".csv"), row.names = FALSE)
-}
-
-for (ins in institutions){
+  
   rest_df=dohooptyhooprest(ins) 
   write.csv(rest_df,paste0("./output/resttransp_",ins,".csv"), row.names = FALSE)
 }
