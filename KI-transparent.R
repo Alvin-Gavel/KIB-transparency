@@ -39,15 +39,6 @@ extract_pmcnumbers = function(loc) {
   return(pmcnumbers)
 }
 
-# This is currently unused, but I may put it back into use later
-checkdiff = function(loc, pmcnumbers){
-  
-  pmcnumbers = extract_pmcnumbers(loc)
-  downloaded=str_remove(filelist,'PMC')
-  downloaded=str_remove(downloaded,'.xml')
-  return(setdiff(pmcnumbers, downloaded))
-}
-
 download_publication_data = function(loc){
   pmcnumbers = extract_pmcnumbers(loc)
   already_downloaded <- list.files(paste0('./publications_',loc,'/'), pattern='*.xml', all.files=FALSE, full.names=FALSE)
