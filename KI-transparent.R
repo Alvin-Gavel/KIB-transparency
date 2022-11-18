@@ -39,14 +39,10 @@ extract_pmcnumbers = function(loc) {
   return(pmcnumbers)
 }
 
-downloadspmc=function(pmcnumbers,loc){
+download_publication_data = function(loc){
+  pmcnumbers = extract_pmcnumbers(loc)
   filenames=paste0('./publications_',loc, '/PMC',as.character(pmcnumbers),'.xml')
   mapply(metareadr::mt_read_pmcoa,pmcid=pmcnumbers,file_name=filenames)
-}
-
-downloads = function(loc){
-  pmcnumbers = extract_pmcnumbers(loc)
-  downloadspmc(pmcnumbers, loc)
 }
 
 checkdiff= function(loc){
