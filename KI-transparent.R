@@ -26,50 +26,50 @@
   library(reshape2)
 }
 
-extract_pmcnumbers = function(ins) {
-  pmcidfilename=paste0("./pmcoalist_",ins,".csv")
-  pmcidlist<-read.delim(pmcidfilename, header = TRUE, sep=',')
-  pmcidlist=pmcidlist$PMCID
+extract_pmcnumbers <- function(ins) {
+  pmcidfilename <- paste0("./pmcoalist_",ins,".csv")
+  pmcidlist <- read.delim(pmcidfilename, header = TRUE, sep=',')
+  pmcidlist <- pmcidlist$PMCID
   
-  pmcnumbers<-list()
+  pmcnumbers <- list()
   for (i in pmcidlist){
-    go=str_replace(i,'PMC','')
-    pmcnumbers=c(pmcnumbers,go)
+    go <- str_replace(i,'PMC','')
+    pmcnumbers <- c(pmcnumbers,go)
   }
   return(pmcnumbers)
 }
 
-download_publication_data = function(ins){
+download_publication_data <- function(ins){
   pmcnumbers = extract_pmcnumbers(ins)
   already_downloaded <- list.files(paste0('./publications_',ins,'/'), pattern='*.xml', all.files=FALSE, full.names=FALSE)
-  already_downloaded=str_remove(already_downloaded,'PMC')
-  already_downloaded=str_remove(already_downloaded,'.xml')
-  remaining = setdiff(pmcnumbers, already_downloaded)
+  already_downloaded <- str_remove(already_downloaded,'PMC')
+  already_downloaded <- str_remove(already_downloaded,'.xml')
+  remaining <- setdiff(pmcnumbers, already_downloaded)
   
   if (length(remaining) > 0) {
-    filenames=paste0('./publications_',ins, '/PMC',as.character(remaining),'.xml')
-    mapply(metareadr::mt_read_pmcoa,pmcid=pmcnumbers,file_name=filenames)
+    filenames <- paste0('./publications_',ins, '/PMC',as.character(remaining),'.xml')
+    mapply(metareadr::mt_read_pmcoa,pmcid=remaining,file_name=filenames)
   }
 }
 
 evaluate_transparency=function(ins){
-  filepath=paste0('./publications_',ins,'/')
+  filepath <- paste0('./publications_',ins,'/')
   filelist <- as.list(list.files(filepath, pattern='*.xml', all.files=FALSE, full.names=FALSE))
   
-  filelist=paste0(filepath, filelist)
+  filelist <- paste0(filepath, filelist)
   cores <- detectCores()
   registerDoParallel(cores=cores)
   
-  code_df = foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_data_code_pmc(x)}
+  code_df <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_data_code_pmc(x)}
   write.csv(code_df,paste0("./output/codesharing_",ins,".csv"), row.names = FALSE)
   
-  rest_df = foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_all_pmc(x)}
+  rest_df <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_all_pmc(x)}
   write.csv(rest_df,paste0("./output/resttransp_",ins,".csv"), row.names = FALSE)
 }
 rbind.fill()
 
-rootpath = here::here()
-institutions=c('umea','link','uppsala','orebro','gbg','lund','ki')
+rootpath <- here::here()
+institutions <- c('umea','link','uppsala','orebro','gbg','lund','ki')
 
 dir.create(file.path(rootpath, 'output'), showWarnings = FALSE)
 for (ins in institutions){
