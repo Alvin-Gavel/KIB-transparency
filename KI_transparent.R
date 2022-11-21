@@ -54,7 +54,7 @@ evaluate_transparency <- function() {
   code_transparency <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_data_code_pmc(x)}
   other_transparency <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_all_pmc(x)}
 
-  transparency <- merge(code_transparency,other_transparency,by="pmid")
+  transparency <- merge(code_transparency,other_transparency,by=c('pmid', 'pmcid_pmc', 'pmcid_uid', 'doi', 'filename', 'is_research', 'is_review', 'is_success'))
   write.csv(transparency, "Output/Transparency.csv", row.names = FALSE)
 }
 
