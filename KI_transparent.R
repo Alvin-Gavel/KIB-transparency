@@ -30,7 +30,7 @@ create_necessary_directories <- function(rootpath) {
   dir.create(file.path(rootpath, 'Output'), showWarnings = FALSE)
 }
 
-download_publication_data <- function(pmids){
+download_publication_data <- function(pmids) {
   already_downloaded <- list.files(paste0('./Publications/'), pattern='*.xml', all.files=FALSE, full.names=FALSE)
   already_downloaded <- str_remove(already_downloaded,'PMC')
   already_downloaded <- str_remove(already_downloaded,'.xml')
@@ -43,7 +43,7 @@ download_publication_data <- function(pmids){
   }
 }
 
-evaluate_transparency <- function(){
+evaluate_transparency <- function() {
   filepath <- paste0('./Publications/')
   filelist <- as.list(list.files(filepath, pattern='*.xml', all.files=FALSE, full.names=FALSE))
   
@@ -51,11 +51,11 @@ evaluate_transparency <- function(){
   cores <- detectCores()
   registerDoParallel(cores=cores)
   
-  code_df <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_data_code_pmc(x)}
-  write.csv(code_df,paste0("./Output/Codesharing.csv"), row.names = FALSE)
-  
-  rest_df <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_all_pmc(x)}
-  write.csv(rest_df,paste0("./Output/Resttransp.csv"), row.names = FALSE)
+  code_transparency <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_data_code_pmc(x)}
+  other_transparency <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_all_pmc(x)}
+
+  transparency <- merge(code_transparency,other_transparency,by="pmid")
+  write.csv(transparency, "Output/Transparency.csv", row.names = FALSE)
 }
 
 run <- function(pmids) {
