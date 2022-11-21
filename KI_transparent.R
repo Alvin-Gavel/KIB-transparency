@@ -31,20 +31,20 @@ create_necessary_directories <- function(rootpath) {
 }
 
 download_publication_data <- function(pmids) {
-  already_downloaded <- list.files(paste0('./Publications/'), pattern='*.xml', all.files=FALSE, full.names=FALSE)
+  already_downloaded <- list.files('Publications/', pattern='*.xml', all.files=FALSE, full.names=FALSE)
   already_downloaded <- str_remove(already_downloaded,'PMC')
   already_downloaded <- str_remove(already_downloaded,'.xml')
   remaining <- setdiff(pmids, already_downloaded)
   
   if (length(remaining) > 0) {
-    filenames <- paste0('./Publications/PMC',as.character(remaining),'.xml')
+    filenames <- paste0('Publications/PMC',as.character(remaining),'.xml')
     print(filenames)
     mapply(metareadr::mt_read_pmcoa,pmcid=remaining,file_name=filenames)
   }
 }
 
 evaluate_transparency <- function() {
-  filepath <- paste0('./Publications/')
+  filepath <- 'Publications/'
   filelist <- as.list(list.files(filepath, pattern='*.xml', all.files=FALSE, full.names=FALSE))
   
   filelist <- paste0(filepath, filelist)
@@ -55,7 +55,7 @@ evaluate_transparency <- function() {
   other_transparency <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_all_pmc(x)}
 
   transparency <- merge(code_transparency,other_transparency,by=c('pmid', 'pmcid_pmc', 'pmcid_uid', 'doi', 'filename', 'is_research', 'is_review', 'is_success'))
-  write.csv(transparency, "Output/Transparency.csv", row.names = FALSE)
+  write.csv(transparency, 'Output/Transparency.csv', row.names = FALSE)
 }
 
 run <- function(pmids) {
