@@ -61,8 +61,8 @@ evaluate_transparency=function(ins){
   registerDoParallel(cores=cores)
   
   code_df <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_data_code_pmc(x)}
-  write.csv(code_df,paste0("./Output/codesharing_",ins,".csv"), row.names = FALSE)
+  write.csv(code_df,paste0("./Output/Codesharing/",ins,".csv"), row.names = FALSE)
   
   rest_df <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_all_pmc(x)}
-  write.csv(rest_df,paste0("./Output/resttransp_",ins,".csv"), row.names = FALSE)
+  write.csv(rest_df,paste0("./Output/Resttransp/",ins,".csv"), row.names = FALSE)
 }

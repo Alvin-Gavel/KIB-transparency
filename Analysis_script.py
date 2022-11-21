@@ -8,8 +8,8 @@ institutions=['gbg']
 # Collect data
 research = []
 for ins in institutions:
-  code=pd.read_csv('./Output/codesharing_{}.csv'.format(ins))
-  rest=pd.read_csv('./Output/resttransp_{}.csv'.format(ins))
+  code=pd.read_csv('./Output/Codesharing/{}.csv'.format(ins))
+  rest=pd.read_csv('./Output/Resttransp/{}.csv'.format(ins))
   transp=pd.merge(code, rest, on='pmid')
   transp['Institution']=ins
   transp=transp.rename(columns={'pmid':'PMID'})
