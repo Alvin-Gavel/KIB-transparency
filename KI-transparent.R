@@ -66,7 +66,6 @@ evaluate_transparency=function(ins){
   rest_df <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_all_pmc(x)}
   write.csv(rest_df,paste0("./output/resttransp_",ins,".csv"), row.names = FALSE)
 }
-rbind.fill()
 
 rootpath <- here::here()
 institutions <- c('umea','link','uppsala','orebro','gbg','lund','ki')
@@ -78,4 +77,3 @@ for (ins in institutions){
   download_publication_data(ins)
   evaluate_transparency(ins)
 }
-
