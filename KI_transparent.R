@@ -6,7 +6,7 @@
   # Note that this requires crminer which is currently a bit hard to get ahold of
   library(rtransparent)
   # This currently uses a path specific to my computer, which is not good
-  library(SparkR, lib.loc = "/home/alvin/spark/spark-3.2.2-bin-hadoop3.2/R/lib/")
+  library(SparkR, lib.loc = "~/spark/spark-3.2.2-bin-hadoop3.2/R/lib/")
   library(SparkR)
   library(tidyverse)
   library(oddpub)
@@ -58,7 +58,7 @@ evaluate_transparency <- function() {
   write.csv(transparency, 'Output/Transparency.csv', row.names = FALSE)
 }
 
-run <- function(pmids) {
+run_transparency <- function(pmids) {
   rootpath <- here::here()
   create_necessary_directories(rootpath)
   download_publication_data(pmids)
