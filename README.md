@@ -1,3 +1,3 @@
-The purpose of the code in this repository is for use by Karolinska Institutet (KI) in estimating open science indicators. That is, whether an article shares data, shares code, discloses conflicts of interest, discloses funding and whether the protocol was preregistered.
+The purpose of the code in this repository is for use by Karolinska Institutet (KI) in estimating open science indicators. That is, whether an article shares data, shares code, discloses conflicts of interest, discloses funding and whether the research protocol was preregistered.
 
-The repository is based on Emmanuel Zavalis' repository `autotransparent`. It in turn makes use the `rtransparent` library by Stylianos Serghiou, which is described in more detail in https://doi.org/10.1371/journal.pbio.3001107.
+The code is based on that stored in Emmanuel Zavalis' repository `autotransparent`. It in turn makes use the `rtransparent` library by Stylianos Serghiou, which is described in more detail in https://doi.org/10.1371/journal.pbio.3001107.
