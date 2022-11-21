@@ -2,7 +2,6 @@
 {
   library(here)
   library(rstudioapi)
-  library(tokenizers)
   library(rcrossref)
   # Note that this requires crminer which is currently a bit hard to get ahold of
   library(rtransparent)
