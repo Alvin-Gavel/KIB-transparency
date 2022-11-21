@@ -41,19 +41,19 @@ extract_pmcnumbers <- function(ins) {
 
 download_publication_data <- function(ins){
   pmcnumbers = extract_pmcnumbers(ins)
-  already_downloaded <- list.files(paste0('./publications_',ins,'/'), pattern='*.xml', all.files=FALSE, full.names=FALSE)
+  already_downloaded <- list.files(paste0('./publications/',ins,'/'), pattern='*.xml', all.files=FALSE, full.names=FALSE)
   already_downloaded <- str_remove(already_downloaded,'PMC')
   already_downloaded <- str_remove(already_downloaded,'.xml')
   remaining <- setdiff(pmcnumbers, already_downloaded)
   
   if (length(remaining) > 0) {
-    filenames <- paste0('./publications_',ins, '/PMC',as.character(remaining),'.xml')
+    filenames <- paste0('./publications/',ins, '/PMC',as.character(remaining),'.xml')
     mapply(metareadr::mt_read_pmcoa,pmcid=remaining,file_name=filenames)
   }
 }
 
 evaluate_transparency=function(ins){
-  filepath <- paste0('./publications_',ins,'/')
+  filepath <- paste0('./publications/',ins,'/')
   filelist <- as.list(list.files(filepath, pattern='*.xml', all.files=FALSE, full.names=FALSE))
   
   filelist <- paste0(filepath, filelist)
