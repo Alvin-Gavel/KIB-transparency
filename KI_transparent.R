@@ -27,7 +27,7 @@
 }
 
 extract_pmcnumbers <- function(ins) {
-  pmcidfilename <- paste0("./pmcoalist_",ins,".csv")
+  pmcidfilename <- paste0("./pmcoalists/",ins,".csv")
   pmcidlist <- read.delim(pmcidfilename, header = TRUE, sep=',')
   pmcidlist <- pmcidlist$PMCID
   
