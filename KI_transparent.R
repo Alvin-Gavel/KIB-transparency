@@ -52,7 +52,7 @@ download_publication_data <- function(ins){
   }
 }
 
-evaluate_transparency=function(ins){
+evaluate_transparency <- function(ins){
   filepath <- paste0('./Publications/',ins,'/')
   filelist <- as.list(list.files(filepath, pattern='*.xml', all.files=FALSE, full.names=FALSE))
   
@@ -65,4 +65,11 @@ evaluate_transparency=function(ins){
   
   rest_df <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_all_pmc(x)}
   write.csv(rest_df,paste0("./Output/Resttransp/",ins,".csv"), row.names = FALSE)
+}
+
+create_necessary_directories <- function(rootpath) {
+  dir.create(file.path(rootpath, 'Publications'), showWarnings = FALSE)
+  dir.create(file.path(rootpath, 'Output'), showWarnings = FALSE)
+  dir.create(file.path(rootpath, 'Output/Codesharing'), showWarnings = FALSE)
+  dir.create(file.path(rootpath, 'Output/Resttransp'), showWarnings = FALSE)
 }
