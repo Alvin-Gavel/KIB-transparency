@@ -27,7 +27,7 @@
 }
 
 extract_pmcnumbers <- function(ins) {
-  pmcidfilename <- paste0("./pmcoalists/",ins,".csv")
+  pmcidfilename <- paste0("./Pmcoalists/",ins,".csv")
   pmcidlist <- read.delim(pmcidfilename, header = TRUE, sep=',')
   pmcidlist <- pmcidlist$PMCID
   
@@ -41,19 +41,19 @@ extract_pmcnumbers <- function(ins) {
 
 download_publication_data <- function(ins){
   pmcnumbers = extract_pmcnumbers(ins)
-  already_downloaded <- list.files(paste0('./publications/',ins,'/'), pattern='*.xml', all.files=FALSE, full.names=FALSE)
+  already_downloaded <- list.files(paste0('./Publications/',ins,'/'), pattern='*.xml', all.files=FALSE, full.names=FALSE)
   already_downloaded <- str_remove(already_downloaded,'PMC')
   already_downloaded <- str_remove(already_downloaded,'.xml')
   remaining <- setdiff(pmcnumbers, already_downloaded)
   
   if (length(remaining) > 0) {
-    filenames <- paste0('./publications/',ins, '/PMC',as.character(remaining),'.xml')
+    filenames <- paste0('./Publications/',ins, '/PMC',as.character(remaining),'.xml')
     mapply(metareadr::mt_read_pmcoa,pmcid=remaining,file_name=filenames)
   }
 }
 
 evaluate_transparency=function(ins){
-  filepath <- paste0('./publications/',ins,'/')
+  filepath <- paste0('./Publications/',ins,'/')
   filelist <- as.list(list.files(filepath, pattern='*.xml', all.files=FALSE, full.names=FALSE))
   
   filelist <- paste0(filepath, filelist)
@@ -61,8 +61,8 @@ evaluate_transparency=function(ins){
   registerDoParallel(cores=cores)
   
   code_df <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_data_code_pmc(x)}
-  write.csv(code_df,paste0("./output/codesharing_",ins,".csv"), row.names = FALSE)
+  write.csv(code_df,paste0("./Output/codesharing_",ins,".csv"), row.names = FALSE)
   
   rest_df <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_all_pmc(x)}
-  write.csv(rest_df,paste0("./output/resttransp_",ins,".csv"), row.names = FALSE)
+  write.csv(rest_df,paste0("./Output/resttransp_",ins,".csv"), row.names = FALSE)
 }
