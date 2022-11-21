@@ -38,7 +38,6 @@ download_publication_data <- function(pmids) {
   
   if (length(remaining) > 0) {
     filenames <- paste0('Publications/PMC',as.character(remaining),'.xml')
-    print(filenames)
     mapply(metareadr::mt_read_pmcoa,pmcid=remaining,file_name=filenames)
   }
 }
