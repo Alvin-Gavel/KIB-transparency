@@ -30,11 +30,11 @@ create_necessary_directories <- function(rootpath) {
   dir.create(file.path(rootpath, 'Output'), showWarnings = FALSE)
 }
 
-download_publication_data <- function(pmids) {
+download_publication_data <- function(pmcids) {
   already_downloaded <- list.files('Publications/', pattern='*.xml', all.files=FALSE, full.names=FALSE)
   already_downloaded <- str_remove(already_downloaded,'PMC')
   already_downloaded <- str_remove(already_downloaded,'.xml')
-  remaining <- setdiff(pmids, already_downloaded)
+  remaining <- setdiff(pmcids, already_downloaded)
   
   if (length(remaining) > 0) {
     filenames <- paste0('Publications/PMC',as.character(remaining),'.xml')
@@ -57,9 +57,9 @@ evaluate_transparency <- function() {
   write.csv(transparency, 'Output/Transparency.csv', row.names = FALSE)
 }
 
-run_transparency <- function(pmids) {
+run_transparency <- function(pmcids) {
   rootpath <- here::here()
   create_necessary_directories(rootpath)
-  download_publication_data(pmids)
+  download_publication_data(pmcids)
   evaluate_transparency()
 }
