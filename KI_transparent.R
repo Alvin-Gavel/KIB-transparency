@@ -55,9 +55,23 @@ evaluate_transparency <- function() {
   code_transparency <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_data_code_pmc(x)}
   other_transparency <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_all_pmc(x)}
 
-  transparency <- merge(code_transparency,other_transparency,by=c('pmid', 'pmcid_pmc', 'pmcid_uid', 'doi', 'filename', 'is_research', 'is_review', 'is_success'))
-  write.csv(transparency, 'Output/Transparency.csv', row.names = FALSE)
-  return(transparency)
+  transparency_table <- merge(code_transparency,other_transparency,by=c('pmid', 'pmcid_pmc', 'pmcid_uid', 'doi', 'filename', 'is_research', 'is_review', 'is_success'))
+  write.csv(transparency_table, 'Output/Transparency.csv', row.names = FALSE)
+  transparency_frame <- data.frame(c(transparency_table['pmid'],
+                                     transparency_table['pmcid_uid'],
+                                     transparency_table['is_open_data'],
+                                     transparency_table['is_open_code'],
+                                     transparency_table['is_coi_pred'],
+                                     transparency_table['is_fund_pred'],
+                                     transparency_table['is_register_pred']))
+  colnames(transparency_frame) <- c('pmid',
+                                    'pmcid',
+                                    'open_data',
+                                    'open_code',
+                                    'coi_pred',
+                                    'fund_pred',
+                                    'register_pred')
+  return(transparency_frame)
 }
 
 run_transparency <- function(pmcids) {
@@ -65,4 +79,29 @@ run_transparency <- function(pmcids) {
   create_necessary_directories(rootpath)
   download_publication_data(pmcids)
   return(evaluate_transparency())
+}
+
+create_table_in_database <- function(db) {
+  statement <- 'CREATE TABLE transparency (
+     pmid int,
+     pmcid int,
+     open_data bool,
+     open_code bool,
+     coi_pred bool,
+     fund_pred bool,
+     register_pred bool
+  )'
+  
+  if (!(dbExistsTable(db, name='transparency'))) {
+    rs <- dbSendStatement(db, statement)
+  }
+}
+
+write_transparency_to_database <- function(db, transparency_frame) {
+  dbWriteTable(db,
+               'transparency',
+               transparency_frame,
+               row.names = FALSE,
+               append = TRUE
+               )
 }
