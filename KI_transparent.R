@@ -57,11 +57,12 @@ evaluate_transparency <- function() {
 
   transparency <- merge(code_transparency,other_transparency,by=c('pmid', 'pmcid_pmc', 'pmcid_uid', 'doi', 'filename', 'is_research', 'is_review', 'is_success'))
   write.csv(transparency, 'Output/Transparency.csv', row.names = FALSE)
+  return(transparency)
 }
 
 run_transparency <- function(pmcids) {
   rootpath <- here::here()
   create_necessary_directories(rootpath)
   download_publication_data(pmcids)
-  evaluate_transparency()
+  return(evaluate_transparency())
 }
