@@ -83,13 +83,13 @@ run_transparency <- function(pmcids) {
 
 create_table_in_database <- function(db) {
   statement <- 'CREATE TABLE transparency (
-     pmid int,
-     pmcid int,
-     open_data bool,
-     open_code bool,
-     coi_pred bool,
-     fund_pred bool,
-     register_pred bool
+     pmid int NOT NULL PRIMARY KEY,
+     pmcid int NOT NULL,
+     open_data bool NOT NULL,
+     open_code bool NOT NULL,
+     coi_pred bool NOT NULL,
+     fund_pred bool NOT NULL,
+     register_pred bool NOT NULL
   )'
   
   if (!(dbExistsTable(db, name='transparency'))) {
