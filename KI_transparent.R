@@ -34,8 +34,10 @@ download_publication_data <- function(pmcids) {
   already_downloaded <- list.files('Publications/', pattern='*.xml', all.files=FALSE, full.names=FALSE)
   already_downloaded <- str_remove(already_downloaded,'PMC')
   already_downloaded <- str_remove(already_downloaded,'.xml')
-  remaining <- setdiff(pmcids, already_downloaded)
   
+  # setdiff is asymmetric, so it's not a problem if the Publications
+  # directory contains additional files not covered by pmcids
+  remaining <- setdiff(pmcids, already_downloaded)
   if (length(remaining) > 0) {
     filenames <- paste0('Publications/PMC',as.character(remaining),'.xml')
     mapply(metareadr::mt_read_pmcoa,pmcid=remaining,file_name=filenames)
