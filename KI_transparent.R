@@ -5,7 +5,7 @@
   library(rcrossref)
   # Note that this requires crminer which is currently a bit hard to get ahold of
   library(rtransparent)
-  # This currently uses a path specific to my computer, which is not good
+  # This path may need to be adjusted.
   library(SparkR, lib.loc = "~/spark/spark-3.2.2-bin-hadoop3.2/R/lib/")
   library(SparkR)
   library(tidyverse)
