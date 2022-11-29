@@ -44,13 +44,15 @@ download_publication_data <- function(pmcids) {
   }
 }
 
-evaluate_transparency <- function() {
+evaluate_transparency <- function(n_cores = 0) {
   filepath <- 'Publications/'
   filelist <- as.list(list.files(filepath, pattern='*.xml', all.files=FALSE, full.names=FALSE))
-  
   filelist <- paste0(filepath, filelist)
-  cores <- detectCores()
-  registerDoParallel(cores=cores)
+  
+  if (n_cores == 0) {
+    n_cores <- detectCores() - 2
+  }
+  registerDoParallel(cores=n_cores)
   
   code_transparency <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_data_code_pmc(x)}
   other_transparency <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_all_pmc(x)}
@@ -82,7 +84,7 @@ run_transparency <- function(pmcids) {
 }
 
 create_table_in_database <- function(db) {
-  statement <- 'CREATE TABLE transparency (
+  statement <- 'CREATE TABLE analysis.transparency (
      pmid int NOT NULL PRIMARY KEY,
      pmcid int NOT NULL,
      open_data bool NOT NULL,
@@ -92,16 +94,29 @@ create_table_in_database <- function(db) {
      register_pred bool NOT NULL
   )'
   
-  if (!(dbExistsTable(db, name='transparency'))) {
+  if (!(dbExistsTable(db, name='analysis.transparency'))) {
+    print('Creating table...')
     rs <- dbSendStatement(db, statement)
   }
 }
 
 write_transparency_to_database <- function(db, transparency_frame) {
-  dbWriteTable(db,
-               'transparency',
-               transparency_frame,
-               row.names = FALSE,
-               append = TRUE
-               )
+  preamble <- 'INSERT INTO analysis.transparency (pmid,
+     pmcid,
+     open_data,
+     open_code,
+     coi_pred,
+     fund_pred,
+     register_pred
+  ) 
+  VALUES '
+  rows <- c()
+  for(i in 1:nrow(transparency_frame)){
+     row <- paste0('(', paste0(transparency_frame[i,],collapse=","), ')')
+     if (!(grepl('NA', row))) {
+        rows <- append(rows, row)
+     }
+  }
+  statement <- paste0(preamble, paste(rows,collapse=',\n'), ';')
+  rs <- dbGetQuery(db, statement)
 }
