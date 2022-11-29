@@ -76,11 +76,11 @@ evaluate_transparency <- function(n_cores = 0) {
   return(transparency_frame)
 }
 
-run_transparency <- function(pmcids) {
+run_transparency <- function(pmcids, n_cores = 0) {
   rootpath <- here::here()
   create_necessary_directories(rootpath)
   download_publication_data(pmcids)
-  return(evaluate_transparency())
+  return(evaluate_transparency(n_cores = n_cores))
 }
 
 create_table_in_database <- function(db) {
