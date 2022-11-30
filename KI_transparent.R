@@ -87,8 +87,8 @@ run_batch <- function(pmcids, batch_number = 0, n_cores = 0) {
   return(evaluate_transparency(batch_number = batch_number, n_cores = n_cores))
 }
 
-create_table_in_database <- function(db) {
-  statement <- 'CREATE TABLE analysis.transparency (
+create_table_in_database <- function(db, table_name) {
+  statement <- paste0('CREATE TABLE ', table_name, ' (
      pmid int NOT NULL PRIMARY KEY,
      pmcid int NOT NULL,
      open_data bool NOT NULL,
@@ -96,7 +96,7 @@ create_table_in_database <- function(db) {
      coi_pred bool NOT NULL,
      fund_pred bool NOT NULL,
      register_pred bool NOT NULL
-  )'
+  )')
   
   if (!(dbExistsTable(db, name='analysis.transparency'))) {
     print('Creating table...')
@@ -104,8 +104,8 @@ create_table_in_database <- function(db) {
   }
 }
 
-write_transparency_to_database <- function(db, transparency_frame) {
-  preamble <- 'INSERT INTO analysis.transparency (pmid,
+write_transparency_to_database <- function(db, transparency_frame, table_name) {
+  preamble <- paste0('INSERT INTO ', table_name, ' (pmid,
      pmcid,
      open_data,
      open_code,
@@ -113,7 +113,7 @@ write_transparency_to_database <- function(db, transparency_frame) {
      fund_pred,
      register_pred
   ) 
-  VALUES '
+  VALUES ')
   rows <- c()
   for(i in 1:nrow(transparency_frame)){
     row <- paste0('(', paste0(transparency_frame[i,],collapse=","), ')')
