@@ -66,6 +66,8 @@ evaluate_transparency <- function(batch_number = 0, n_cores = 0) {
   
   transparency_frame <- data.frame(c(transparency_table['pmid'],
                                      transparency_table['pmcid_uid'],
+                                     transparency_table['is_research'],
+                                     transparency_table['is_review'],
                                      transparency_table['is_open_data'],
                                      transparency_table['is_open_code'],
                                      transparency_table['is_coi_pred'],
@@ -73,6 +75,8 @@ evaluate_transparency <- function(batch_number = 0, n_cores = 0) {
                                      transparency_table['is_register_pred']))
   colnames(transparency_frame) <- c('pmid',
                                     'pmcid',
+                                    'research_article',
+                                    'review_article',
                                     'open_data',
                                     'open_code',
                                     'coi_pred',
@@ -91,6 +95,8 @@ create_table_in_database <- function(db, table_name) {
   statement <- paste0('CREATE TABLE ', table_name, ' (
      pmid int NOT NULL PRIMARY KEY,
      pmcid int NOT NULL,
+     research_article bool NOT NULL,
+     review_article bool NOT NULL,
      open_data bool NOT NULL,
      open_code bool NOT NULL,
      coi_pred bool NOT NULL,
@@ -107,6 +113,8 @@ create_table_in_database <- function(db, table_name) {
 write_transparency_to_database <- function(db, transparency_frame, table_name) {
   preamble <- paste0('INSERT INTO ', table_name, ' (pmid,
      pmcid,
+     research_article,
+     review_article,
      open_data,
      open_code,
      coi_pred,
