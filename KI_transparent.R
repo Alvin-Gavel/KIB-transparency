@@ -29,9 +29,9 @@
 create_necessary_directories <- function(batch_number = 0) {
   print('Creating necessary directories...')
   dir.create('Publications', showWarnings = FALSE)
-  dir.create('Output', showWarnings = FALSE)
+  dir.create('Full_tables', showWarnings = FALSE)
   dir.create(paste0('Publications/Batch_', batch_number), showWarnings = FALSE)
-  dir.create(paste0('Output/Batch_', batch_number), showWarnings = FALSE)
+  dir.create(paste0('Full_tables/Batch_', batch_number), showWarnings = FALSE)
 }
 
 download_publication_data <- function(pmcids, batch_number = 0) {
@@ -62,7 +62,7 @@ evaluate_transparency <- function(batch_number = 0, n_cores = 0) {
   other_transparency <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_all_pmc(x)}
   
   transparency_table <- merge(code_transparency,other_transparency,by=c('pmid', 'pmcid_pmc', 'pmcid_uid', 'doi', 'filename', 'is_research', 'is_review', 'is_success'))
-  write.csv(transparency_table, paste0('Output/Batch_', batch_number, '/Transparency.csv'), row.names = FALSE)
+  write.csv(transparency_table, paste0('Full_tables/Batch_', batch_number, '/Transparency.csv'), row.names = FALSE)
   
   transparency_frame <- data.frame(c(transparency_table['pmid'],
                                      transparency_table['pmcid_uid'],
