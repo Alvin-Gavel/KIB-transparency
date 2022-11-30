@@ -23,11 +23,13 @@
   library(foreach)
   library(ggplot2)
   library(reshape2)
+  library(RPostgres)
 }
 
 create_necessary_directories <- function(rootpath) {
-  dir.create(file.path(rootpath, 'Publications'), showWarnings = FALSE)
-  dir.create(file.path(rootpath, 'Output'), showWarnings = FALSE)
+  print('Creating necessary directories...')
+  dir.create('Publications', showWarnings = FALSE)
+  dir.create('Output', showWarnings = FALSE)
 }
 
 download_publication_data <- function(pmcids) {
@@ -56,9 +58,10 @@ evaluate_transparency <- function(n_cores = 0) {
   
   code_transparency <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_data_code_pmc(x)}
   other_transparency <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_all_pmc(x)}
-
+  
   transparency_table <- merge(code_transparency,other_transparency,by=c('pmid', 'pmcid_pmc', 'pmcid_uid', 'doi', 'filename', 'is_research', 'is_review', 'is_success'))
   write.csv(transparency_table, 'Output/Transparency.csv', row.names = FALSE)
+  
   transparency_frame <- data.frame(c(transparency_table['pmid'],
                                      transparency_table['pmcid_uid'],
                                      transparency_table['is_open_data'],
@@ -112,10 +115,10 @@ write_transparency_to_database <- function(db, transparency_frame) {
   VALUES '
   rows <- c()
   for(i in 1:nrow(transparency_frame)){
-     row <- paste0('(', paste0(transparency_frame[i,],collapse=","), ')')
-     if (!(grepl('NA', row))) {
-        rows <- append(rows, row)
-     }
+    row <- paste0('(', paste0(transparency_frame[i,],collapse=","), ')')
+    if (!(grepl('NA', row))) {
+      rows <- append(rows, row)
+    }
   }
   statement <- paste0(preamble, paste(rows,collapse=',\n'), ';')
   rs <- dbGetQuery(db, statement)
