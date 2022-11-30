@@ -26,14 +26,16 @@
   library(RPostgres)
 }
 
-create_necessary_directories <- function(rootpath) {
+create_necessary_directories <- function(batch_number = 0) {
   print('Creating necessary directories...')
   dir.create('Publications', showWarnings = FALSE)
   dir.create('Output', showWarnings = FALSE)
+  dir.create(paste0('Publications/Batch_', batch_number), showWarnings = FALSE)
+  dir.create(paste0('Output/Batch_', batch_number), showWarnings = FALSE)
 }
 
-download_publication_data <- function(pmcids) {
-  already_downloaded <- list.files('Publications/', pattern='*.xml', all.files=FALSE, full.names=FALSE)
+download_publication_data <- function(pmcids, batch_number = 0) {
+  already_downloaded <- list.files(paste0('Publications/Batch_', batch_number, '/'), pattern='*.xml', all.files=FALSE, full.names=FALSE)
   already_downloaded <- str_remove(already_downloaded,'PMC')
   already_downloaded <- str_remove(already_downloaded,'.xml')
   
@@ -41,13 +43,13 @@ download_publication_data <- function(pmcids) {
   # directory contains additional files not covered by pmcids
   remaining <- setdiff(pmcids, already_downloaded)
   if (length(remaining) > 0) {
-    filenames <- paste0('Publications/PMC',as.character(remaining),'.xml')
+    filenames <- paste0('Publications/Batch_', batch_number, '/PMC',as.character(remaining),'.xml')
     mapply(metareadr::mt_read_pmcoa,pmcid=remaining,file_name=filenames)
   }
 }
 
-evaluate_transparency <- function(n_cores = 0) {
-  filepath <- 'Publications/'
+evaluate_transparency <- function(batch_number = 0, n_cores = 0) {
+  filepath <- paste0('Publications/Batch_', batch_number, '/')
   filelist <- as.list(list.files(filepath, pattern='*.xml', all.files=FALSE, full.names=FALSE))
   filelist <- paste0(filepath, filelist)
   
@@ -60,7 +62,7 @@ evaluate_transparency <- function(n_cores = 0) {
   other_transparency <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_all_pmc(x)}
   
   transparency_table <- merge(code_transparency,other_transparency,by=c('pmid', 'pmcid_pmc', 'pmcid_uid', 'doi', 'filename', 'is_research', 'is_review', 'is_success'))
-  write.csv(transparency_table, 'Output/Transparency.csv', row.names = FALSE)
+  write.csv(transparency_table, paste0('Output/Batch_', batch_number, '/Transparency.csv'), row.names = FALSE)
   
   transparency_frame <- data.frame(c(transparency_table['pmid'],
                                      transparency_table['pmcid_uid'],
@@ -79,11 +81,10 @@ evaluate_transparency <- function(n_cores = 0) {
   return(transparency_frame)
 }
 
-run_transparency <- function(pmcids, n_cores = 0) {
-  rootpath <- here::here()
-  create_necessary_directories(rootpath)
-  download_publication_data(pmcids)
-  return(evaluate_transparency(n_cores = n_cores))
+run_batch <- function(pmcids, batch_number = 0, n_cores = 0) {
+  create_necessary_directories(batch_number)
+  download_publication_data(pmcids, batch_number = batch_number)
+  return(evaluate_transparency(batch_number = batch_number, n_cores = n_cores))
 }
 
 create_table_in_database <- function(db) {
