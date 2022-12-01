@@ -20,7 +20,7 @@ The purpose of the code in this repository is for use by Karolinska Institutet (
 
 There is also a function for appending the dataframe to a SQL table.
 
-It is important to note that the code cannot verify that any of the claims in the article are `true`. It is entirely possible that an article that claims to provide access to data actually only contains a dead link.
+It is important to note that the code cannot verify that any of the claims in the article are *true*. It is entirely possible that an article that claims to provide access to data actually only contains a dead link.
 
 The code makes use of the `rtransparent` library by Stylianos Serghiou, which can be found in the repository https://github.com/serghiou/rtransparent and is described in more detail in https://doi.org/10.1371/journal.pbio.3001107.
 
