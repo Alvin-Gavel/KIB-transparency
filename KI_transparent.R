@@ -18,7 +18,8 @@
 
 batch <- setRefClass("batch",
                      fields = list(batch_name = "character",
-                                   pmcids = "character")
+                                   pmcids = "character",
+                                   n_cores = "numeric")
 )
 
 batch$methods(create_necessary_directories = function() {
@@ -43,7 +44,7 @@ batch$methods(download_publication_data = function() {
   }
 })
 
-batch$methods(evaluate_transparency = function(n_cores = 0) {
+batch$methods(evaluate_transparency = function() {
   filepath <- paste0('Publications/Batch_', batch_name, '/')
   filelist <- as.list(list.files(filepath, pattern='*.xml', all.files=FALSE, full.names=FALSE))
   filelist <- paste0(filepath, filelist)
@@ -81,10 +82,10 @@ batch$methods(evaluate_transparency = function(n_cores = 0) {
   return(transparency_frame)
 })
 
-batch$methods(run = function(n_cores = 0) {
+batch$methods(run = function() {
   create_necessary_directories()
   download_publication_data()
-  return(evaluate_transparency(n_cores = n_cores))
+  return(evaluate_transparency())
 })
 
 create_table_in_database <- function(db, table_name) {
