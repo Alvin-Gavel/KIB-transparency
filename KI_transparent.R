@@ -7,23 +7,30 @@
   library(SparkR, lib.loc = "~/spark/spark-3.2.2-bin-hadoop3.2/R/lib/")
   library(SparkR)
   library(stringr)
+  library(plyr)
   library(dplyr)
   library(parallel)
+  library(doParallel)
   library(doFuture)
   library(foreach)
   library(RPostgres)
 }
 
-create_necessary_directories <- function(batch_number = 0) {
+batch <- setRefClass("batch",
+                     fields = list(batch_name = "character",
+                                   pmcids = "character")
+)
+
+batch$methods(create_necessary_directories = function() {
   print('Creating necessary directories...')
   dir.create('Publications', showWarnings = FALSE)
   dir.create('Full_tables', showWarnings = FALSE)
-  dir.create(paste0('Publications/Batch_', batch_number), showWarnings = FALSE)
-  dir.create(paste0('Full_tables/Batch_', batch_number), showWarnings = FALSE)
-}
+  dir.create(paste0('Publications/Batch_', batch_name), showWarnings = FALSE)
+  dir.create(paste0('Full_tables/Batch_', batch_name), showWarnings = FALSE)
+})
 
-download_publication_data <- function(pmcids, batch_number = 0) {
-  already_downloaded <- list.files(paste0('Publications/Batch_', batch_number, '/'), pattern='*.xml', all.files=FALSE, full.names=FALSE)
+batch$methods(download_publication_data = function() {
+  already_downloaded <- list.files(paste0('Publications/Batch_', batch_name, '/'), pattern='*.xml', all.files=FALSE, full.names=FALSE)
   already_downloaded <- str_remove(already_downloaded,'PMC')
   already_downloaded <- str_remove(already_downloaded,'.xml')
   
@@ -31,13 +38,13 @@ download_publication_data <- function(pmcids, batch_number = 0) {
   # directory contains additional files not covered by pmcids
   remaining <- setdiff(pmcids, already_downloaded)
   if (length(remaining) > 0) {
-    filenames <- paste0('Publications/Batch_', batch_number, '/PMC',as.character(remaining),'.xml')
+    filenames <- paste0('Publications/Batch_', batch_name, '/PMC',as.character(remaining),'.xml')
     mapply(metareadr::mt_read_pmcoa,pmcid=remaining,file_name=filenames)
   }
-}
+})
 
-evaluate_transparency <- function(batch_number = 0, n_cores = 0) {
-  filepath <- paste0('Publications/Batch_', batch_number, '/')
+batch$methods(evaluate_transparency = function(n_cores = 0) {
+  filepath <- paste0('Publications/Batch_', batch_name, '/')
   filelist <- as.list(list.files(filepath, pattern='*.xml', all.files=FALSE, full.names=FALSE))
   filelist <- paste0(filepath, filelist)
   
@@ -50,7 +57,7 @@ evaluate_transparency <- function(batch_number = 0, n_cores = 0) {
   other_transparency <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_all_pmc(x)}
   
   transparency_table <- merge(code_transparency,other_transparency,by=c('pmid', 'pmcid_pmc', 'pmcid_uid', 'doi', 'filename', 'is_research', 'is_review', 'is_success'))
-  write.csv(transparency_table, paste0('Full_tables/Batch_', batch_number, '/Transparency.csv'), row.names = FALSE)
+  write.csv(transparency_table, paste0('Full_tables/Batch_', batch_name, '/Transparency.csv'), row.names = FALSE)
   
   transparency_frame <- data.frame(c(transparency_table['pmid'],
                                      transparency_table['pmcid_uid'],
@@ -61,6 +68,7 @@ evaluate_transparency <- function(batch_number = 0, n_cores = 0) {
                                      transparency_table['is_coi_pred'],
                                      transparency_table['is_fund_pred'],
                                      transparency_table['is_register_pred']))
+  
   colnames(transparency_frame) <- c('pmid',
                                     'pmcid',
                                     'research_article',
@@ -71,13 +79,13 @@ evaluate_transparency <- function(batch_number = 0, n_cores = 0) {
                                     'fund_pred',
                                     'register_pred')
   return(transparency_frame)
-}
+})
 
-run_batch <- function(pmcids, batch_number = 0, n_cores = 0) {
-  create_necessary_directories(batch_number)
-  download_publication_data(pmcids, batch_number = batch_number)
-  return(evaluate_transparency(batch_number = batch_number, n_cores = n_cores))
-}
+batch$methods(run = function(n_cores = 0) {
+  create_necessary_directories()
+  download_publication_data()
+  return(evaluate_transparency(n_cores = n_cores))
+})
 
 create_table_in_database <- function(db, table_name) {
   statement <- paste0('CREATE TABLE ', table_name, ' (
@@ -92,7 +100,7 @@ create_table_in_database <- function(db, table_name) {
      register_pred bool NOT NULL
   )')
   
-  if (!(dbExistsTable(db, name='analysis.transparency'))) {
+  if (!(dbExistsTable(db, name=table_name))) {
     print('Creating table...')
     rs <- dbSendStatement(db, statement)
   }
