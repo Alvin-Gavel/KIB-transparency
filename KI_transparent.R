@@ -126,6 +126,7 @@ write_transparency_to_database <- function(db, transparency_frame, table_name) {
       rows <- append(rows, row)
     }
   }
-  statement <- paste0(preamble, paste(rows,collapse=',\n'), ';')
+  finish <- '\nON DUPLICATE KEY UPDATE pmid = pmid;'
+  statement <- paste0(preamble, paste(rows,collapse=',\n'), finish)
   rs <- dbGetQuery(db, statement)
 }
