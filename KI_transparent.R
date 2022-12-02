@@ -19,7 +19,7 @@
 batch <- setRefClass("batch",
                      fields = list(batch_name = "character",
                                    pmcids = "character",
-                                   n_cores = "numeric"),
+                                   n_cores = "numeric")
 )
 
 batch$methods(
@@ -93,8 +93,15 @@ batch$methods(
   }
 )
 
-create_table_in_database <- function(db, table_name) {
-  statement <- paste0('CREATE TABLE ', table_name, ' (
+
+connection <- setRefClass("connection",
+                          fields = list(table_name = "character",
+                                        database_connection = 'DBIConnection')
+)
+
+connection$methods(
+  create_table_in_database = function() {
+    statement <- paste0('CREATE TABLE ', table_name, ' (
      pmid int NOT NULL PRIMARY KEY,
      pmcid int NOT NULL,
      research_article bool NOT NULL,
@@ -105,15 +112,14 @@ create_table_in_database <- function(db, table_name) {
      fund_pred bool NOT NULL,
      register_pred bool NOT NULL
   )')
-  
-  if (!(dbExistsTable(db, name=table_name))) {
-    print('Creating table...')
-    rs <- dbSendStatement(db, statement)
-  }
-}
-
-write_transparency_to_database <- function(db, transparency_frame, table_name) {
-  preamble <- paste0('INSERT INTO ', table_name, ' (pmid,
+    
+    if (!(dbExistsTable(db, name=table_name))) {
+      print('Creating table...')
+      rs <- dbSendStatement(db, statement)
+    }
+  },
+  write_transparency_to_database = function(transparency_frame) {
+    preamble <- paste0('INSERT INTO ', table_name, ' (pmid,
      pmcid,
      research_article,
      review_article,
@@ -124,14 +130,14 @@ write_transparency_to_database <- function(db, transparency_frame, table_name) {
      register_pred
   ) 
   VALUES ')
-  rows <- c()
-  for(i in 1:nrow(transparency_frame)){
-    row <- paste0('(', paste0(transparency_frame[i,],collapse=","), ')')
-    if (!(grepl('NA', row))) {
-      rows <- append(rows, row)
+    rows <- c()
+    for(i in 1:nrow(transparency_frame)){
+      row <- paste0('(', paste0(transparency_frame[i,],collapse=","), ')')
+      if (!(grepl('NA', row))) {
+        rows <- append(rows, row)
+      }
     }
-  }
-  finish <- '\nON DUPLICATE KEY UPDATE pmid = pmid;'
-  statement <- paste0(preamble, paste(rows,collapse=',\n'), finish)
-  rs <- dbGetQuery(db, statement)
-}
+    finish <- '\nON DUPLICATE KEY UPDATE pmid = pmid;'
+    statement <- paste0(preamble, paste(rows,collapse=',\n'), finish)
+    rs <- dbGetQuery(db, statement)
+  })
