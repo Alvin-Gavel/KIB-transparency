@@ -19,8 +19,18 @@
 batch <- setRefClass("batch",
                      fields = list(batch_name = "character",
                                    pmcids = "character",
-                                   n_cores = "numeric")
+                                   n_cores = "numeric"),
 )
+
+batch$methods(initialize = function(batch_name, pmcids, n_cores = 0) {
+  batch_name <<- batch_name
+  pmcids <<- pmcids
+  if (n_cores == 0) {
+    n_cores <<- detectCores() - 2
+  } else {
+    n_cores <<- n_cores
+  }
+})
 
 batch$methods(create_necessary_directories = function() {
   print('Creating necessary directories...')
@@ -49,9 +59,6 @@ batch$methods(evaluate_transparency = function() {
   filelist <- as.list(list.files(filepath, pattern='*.xml', all.files=FALSE, full.names=FALSE))
   filelist <- paste0(filepath, filelist)
   
-  if (n_cores == 0) {
-    n_cores <- detectCores() - 2
-  }
   registerDoParallel(cores=n_cores)
   
   code_transparency <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_data_code_pmc(x)}
