@@ -22,8 +22,6 @@ There is also a function for appending the dataframe to a SQL table.
 
 It is important to note that the code cannot verify that any of the claims in the article are *true*. It is entirely possible that an article that claims to provide access to data actually only contains a dead link.
 
-`KI-transparent` makes use of the `rtransparent` library by Stylianos Serghiou, which can be found in the repository https://github.com/serghiou/rtransparent and is described in more detail in https://doi.org/10.1371/journal.pbio.3001107.
+`KI-transparent` makes use of the `rtransparent` library by Stylianos Serghiou, which can be found in the repository https://github.com/serghiou/rtransparent and is described in more detail in https://doi.org/10.1371/journal.pbio.3001107. Both `KI-transparent` itself and `rtransparent` make use of a number of other R libraries. Most can be installed simply through `packages.install(library name)`, but specifically `crminer` can be slightly hard to get hold of. As of December 2nd 2022, the package has been taken down from CRAN, but the most recent version can still be downloaded from the archive.
 
 `KI-transparent` is based on code written by Emmanual Zavalis, which can be be found in the repository https://github.com/zavalis/autotransparent.
-
-`KI-transparent` makes use of a number of other R libraries. Most can be installed simply through `packages.install(library name)`, but specifically `crminer` can be slightly hard to get hold of. As of December 2nd 2022, the package has been taken down from CRAN, but the most recent version can still be downloaded from the archive.
