@@ -4,7 +4,7 @@
   # Note that this requires crminer which is currently a bit hard to get ahold of
   library(rtransparent)
   # This path may need to be adjusted.
-  library(SparkR, lib.loc = "~/spark/spark-3.2.2-bin-hadoop3.2/R/lib/")
+  library(SparkR, lib.loc = '~/spark/spark-3.2.2-bin-hadoop3.2/R/lib/')
   library(SparkR)
   library(stringr)
   library(plyr)
@@ -16,10 +16,10 @@
   library(RPostgres)
 }
 
-batch <- setRefClass("batch",
-                     fields = list(batch_name = "character",
-                                   pmcids = "character",
-                                   n_cores = "numeric")
+batch <- setRefClass('batch',
+                     fields = list(batch_name = 'character',
+                                   pmcids = 'character',
+                                   n_cores = 'numeric')
 )
 
 batch$methods(
@@ -94,8 +94,8 @@ batch$methods(
 )
 
 
-connection <- setRefClass("connection",
-                          fields = list(table_name = "character",
+connection <- setRefClass('connection',
+                          fields = list(table_name = 'character',
                                         database_connection = 'DBIConnection')
 )
 
@@ -132,7 +132,7 @@ connection$methods(
   VALUES ')
     rows <- c()
     for(i in 1:nrow(transparency_frame)){
-      row <- paste0('(', paste0(transparency_frame[i,],collapse=","), ')')
+      row <- paste0('(', paste0(transparency_frame[i,],collapse=','), ')')
       if (!(grepl('NA', row))) {
         rows <- append(rows, row)
       }
