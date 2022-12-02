@@ -1,28 +1,16 @@
 # LIBRARIES BELOW
 {
   library(here)
-  library(rstudioapi)
-  library(rcrossref)
   # Note that this requires crminer which is currently a bit hard to get ahold of
   library(rtransparent)
   # This path may need to be adjusted.
   library(SparkR, lib.loc = "~/spark/spark-3.2.2-bin-hadoop3.2/R/lib/")
   library(SparkR)
-  library(tidyverse)
-  library(oddpub)
-  library(metareadr)
   library(stringr)
-  library(plyr)
   library(dplyr)
-  library(crminer)
   library(parallel)
-  library(lme4)
-  library(doParallel)
-  library(progressr)
   library(doFuture)
   library(foreach)
-  library(ggplot2)
-  library(reshape2)
   library(RPostgres)
 }
 
