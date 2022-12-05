@@ -1,6 +1,5 @@
 # LIBRARIES BELOW
 {
-  library(here)
   # Note that this requires crminer which is currently a bit hard to get ahold of
   library(rtransparent)
   # This path may need to be adjusted.
