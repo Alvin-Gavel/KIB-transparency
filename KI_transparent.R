@@ -115,9 +115,9 @@ connection$methods(
      register_pred bool NOT NULL
   )')
     
-    if (!(dbExistsTable(db, name=table_name))) {
+    if (!(dbExistsTable(database_connection, name=table_name))) {
       print('Creating table...')
-      rs <- dbSendStatement(db, statement)
+      rs <- dbSendStatement(database_connection, statement)
     }
   },
   write_transparency_to_database = function(transparency_frame) {
@@ -141,5 +141,5 @@ connection$methods(
     }
     finish <- '\nON DUPLICATE KEY UPDATE pmid = pmid;'
     statement <- paste0(preamble, paste(rows,collapse=',\n'), finish)
-    rs <- dbGetQuery(db, statement)
+    rs <- dbGetQuery(database_connection, statement)
   })
