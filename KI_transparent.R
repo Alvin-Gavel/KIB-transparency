@@ -13,6 +13,8 @@
   library(doParallel)
   library(doFuture)
   library(foreach)
+  # We use a Postgres database, but you could replace this with RMySQL and the code
+  # should still run
   library(RPostgres)
 }
 
