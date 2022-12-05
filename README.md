@@ -18,9 +18,9 @@ The purpose of the code in this repository is for use by Karolinska Institutet (
 
 `register_pred`: Whether the research protocol is pre-registered
 
-There is also a function for appending the dataframe to a SQL table.
+There are also functions for appending the dataframe to a SQL table, and creating the table if necessary.
 
-It is important to note that the code cannot verify that any of the claims in the article are *true*. It is entirely possible that an article that claims to provide access to data actually only contains a dead link.
+It is important to note that while the code searches articles for claims about transparency, it cannot verify that any of the claims are *true*. It is entirely possible that an article that claims to provide access to data actually only contains a dead link.
 
 `KI-transparent` makes use of the `rtransparent` library by Stylianos Serghiou, which can be found in the repository https://github.com/serghiou/rtransparent and is described in more detail in https://doi.org/10.1371/journal.pbio.3001107. Both `KI-transparent` itself and `rtransparent` make use of a number of other R libraries. Most can be installed simply through `packages.install(library name)`, but specifically `crminer` can be slightly hard to get hold of. As of December 2nd 2022, the package has been taken down from CRAN, but the most recent version can still be downloaded from the archive.
 
