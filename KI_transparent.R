@@ -138,7 +138,7 @@ connection$methods(
         rows <- append(rows, row)
       }
     }
-    finish <- '\nON DUPLICATE KEY UPDATE pmid = pmid;'
+    finish <- '\nON CONFLICT (pmid) DO NOTHING;'
     statement <- paste0(preamble, paste(rows,collapse=',\n'), finish)
     rs <- dbGetQuery(database_connection, statement)
   })
