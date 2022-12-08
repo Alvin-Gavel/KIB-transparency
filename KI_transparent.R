@@ -62,7 +62,11 @@ batch$methods(
     if (n_remaining > 0) {
       filenames <- paste0('Publications/Batch_', batch_name, '/PMC',as.character(remaining),'.xml')
       for (i in 1:n_remaining) {
-        metareadr::mt_read_pmcoa(remaining[i],file_name=filenames[i])
+        tryCatch(metareadr::mt_read_pmcoa(remaining[i],file_name=filenames[i]),
+                 error = function(e) {
+                   print(paste0('Problem with download of ', file_name, ', skipping for now...'))
+                 }
+        )
       }
     }
     if (verbose) {
