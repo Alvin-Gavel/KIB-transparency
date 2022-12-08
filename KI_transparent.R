@@ -20,11 +20,12 @@
 batch <- setRefClass('batch',
                      fields = list(batch_name = 'character',
                                    pmcids = 'character',
-                                   n_cores = 'numeric')
+                                   n_cores = 'numeric',
+                                   verbose = 'logical')
 )
 
 batch$methods(
-  initialize = function(batch_name, pmcids, n_cores = 0) {
+  initialize = function(batch_name, pmcids, n_cores = 0, verbose = FALSE) {
     batch_name <<- batch_name
     pmcids <<- pmcids
     if (n_cores == 0) {
@@ -32,12 +33,19 @@ batch$methods(
     } else {
       n_cores <<- n_cores
     }
+    verbose <<- verbose
   },
   create_necessary_directories = function() {
+    if (verbose) {
+      print('Creating necessary directories...')
+    }
     dir.create('Publications', showWarnings = FALSE)
     dir.create('Full_tables', showWarnings = FALSE)
     dir.create(paste0('Publications/Batch_', batch_name), showWarnings = FALSE)
     dir.create(paste0('Full_tables/Batch_', batch_name), showWarnings = FALSE)
+    if (verbose) {
+      print('Done!')
+    }
   },
   download_publication_data = function() {
     already_downloaded <- list.files(paste0('Publications/Batch_', batch_name, '/'), pattern='*.xml', all.files=FALSE, full.names=FALSE)
@@ -47,9 +55,18 @@ batch$methods(
     # setdiff is asymmetric, so it's not a problem if the Publications
     # directory contains additional files not covered by pmcids
     remaining <- setdiff(pmcids, already_downloaded)
-    if (length(remaining) > 0) {
+    n_remaining <- length(remaining)
+    if (verbose) {
+      print(paste0('Downloading ', n_remaining , ' files of publication data...'))
+    }
+    if (n_remaining > 0) {
       filenames <- paste0('Publications/Batch_', batch_name, '/PMC',as.character(remaining),'.xml')
-      mapply(metareadr::mt_read_pmcoa,pmcid=remaining,file_name=filenames)
+      for (i in 1:n_remaining) {
+        metareadr::mt_read_pmcoa(remaining[i],file_name=filenames[i])
+      }
+    }
+    if (verbose) {
+      print('Done!')
     }
   },
   evaluate_transparency = function() {
@@ -57,6 +74,10 @@ batch$methods(
     filelist <- as.list(list.files(filepath, pattern='*.xml', all.files=FALSE, full.names=FALSE))
     filelist <- paste0(filepath, filelist)
     
+    n_files <- length(filelist)
+    if (verbose) {
+      print(paste0('Evaluating transparency for ', n_files, ' files...'))
+    }
     registerDoParallel(cores=n_cores)
     
     code_transparency <- foreach::foreach(x = filelist,.combine='rbind.fill') %dopar%{rtransparent::rt_data_code_pmc(x)}
@@ -84,27 +105,15 @@ batch$methods(
                                       'coi_pred',
                                       'fund_pred',
                                       'register_pred')
+    if (verbose) {
+      print('Done!')
+    }
     return(transparency_frame)
   },
-  run = function(verbose=FALSE) {
-    if (verbose) {
-      print('Creating necessary directories...')
-    }
+  run = function() {
     create_necessary_directories()
-    if (verbose) {
-      print('Done!')
-      print('Downloading publication data...')
-    }
     download_publication_data()
-    if (verbose) {
-      print('Done!')
-      print('Evaluating transparency...')
-    }
-    transparency_frame <- evaluate_transparency()
-    if (verbose) {
-      print('Done!')
-    }
-    return(transparency_frame)
+    return(evaluate_transparency())
   }
 )
 
