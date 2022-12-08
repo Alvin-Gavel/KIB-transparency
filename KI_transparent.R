@@ -56,10 +56,11 @@ batch$methods(
     # directory contains additional files not covered by pmcids
     remaining <- setdiff(pmcids, already_downloaded)
     n_remaining <- length(remaining)
-    if (verbose) {
-      print(paste0('Downloading ', n_remaining , ' files of publication data...'))
-    }
+
     if (n_remaining > 0) {
+      if (verbose) {
+        print(paste0('Downloading ', n_remaining , ' files of publication data...'))
+      }
       filenames <- paste0('Publications/Batch_', batch_name, '/PMC',as.character(remaining),'.xml')
       for (i in 1:n_remaining) {
         tryCatch(metareadr::mt_read_pmcoa(remaining[i],file_name=filenames[i]),
@@ -68,9 +69,11 @@ batch$methods(
                  }
         )
       }
-    }
-    if (verbose) {
-      print('Done!')
+      if (verbose) {
+        print('Done!')
+      }
+    } else {
+      print('No additional files to load!')
     }
   },
   evaluate_transparency = function() {
