@@ -34,7 +34,6 @@ batch$methods(
     }
   },
   create_necessary_directories = function() {
-    print('Creating necessary directories...')
     dir.create('Publications', showWarnings = FALSE)
     dir.create('Full_tables', showWarnings = FALSE)
     dir.create(paste0('Publications/Batch_', batch_name), showWarnings = FALSE)
@@ -87,10 +86,25 @@ batch$methods(
                                       'register_pred')
     return(transparency_frame)
   },
-  run = function() {
+  run = function(verbose=FALSE) {
+    if (verbose) {
+      print('Creating necessary directories...')
+    }
     create_necessary_directories()
+    if (verbose) {
+      print('Done!')
+      print('Downloading publication data...')
+    }
     download_publication_data()
-    return(evaluate_transparency())
+    if (verbose) {
+      print('Done!')
+      print('Evaluating transparency...')
+    }
+    transparency_frame <- evaluate_transparency()
+    if (verbose) {
+      print('Done!')
+    }
+    return(transparency_frame)
   }
 )
 
