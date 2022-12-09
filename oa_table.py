@@ -1,4 +1,6 @@
+from configparser import ConfigParser
 import pandas as pd
+import psycopg2 as ps
 import wget
 
 class open_access_table:
@@ -6,17 +8,80 @@ class open_access_table:
     This class describes a table of open access files on Pubmed
     Central.
     """
-    def __init__(self):
+    def __init__(self, table_name, config_path):
+        self.table_name = table_name
+        self.config_path = config_path
+        self.config = self.configure()
+        
         self.filename = 'oa_file_list.txt'
         self.link = 'ftp://ftp.ncbi.nlm.nih.gov/pub/pmc/' + self.filename
         self.oa_table = None
         return
-    
-    def get_file_list(self): 
+
+    def configure(self):
+        """
+        Code courtesy of https://www.postgresqltutorial.com/postgresql-python/connect/
+        """
+        parser = ConfigParser()
+        parser.read(self.config_path)
+
+        config = {}
+        for param in list(parser.items('database')):
+            config[param[0]] = param[1]
+        return config
+
+    def get_file_list(self):
         wget.download(self.link)
         return
 
     def read_file_list(self):
         colnames = ['gz_file', 'citation', 'pmcid', 'pmid', 'rights']
         self.oa_table = pd.read_csv(self.filename, sep='\t', skiprows=1, names=colnames)
+        return
+
+    def execute_sql_query(self, query):
+        """
+        Code courtesy of https://www.postgresqltutorial.com/postgresql-python/create-tables/
+        """
+        conn = ps.connect(host = self.config['host'],
+                                database = self.config['db'],
+                                user = self.config['user'],
+                                password = self.config['pwd'])        
+        try:
+            params = config()
+            conn = ps.connect(**params)
+            cur = conn.cursor()
+            cur.execute(query)
+            cur.close()
+            conn.commit()
+        except (Exception, ps.DatabaseError) as error:
+            print(error)
+
+        if conn != None:
+            conn.close()
+        return
+
+    def create_db_table(self):
+        """
+        Do not use this just now. I may take both it and the corresponding function in the R code out.
+        """
+        query = 'CREATE TABLE {} (\n'.format(self.table_name)
+        query +='pmid int NOT NULL PRIMARY KEY,\n'
+        query +='pmcid int NOT NULL\n'
+        query +=')\n'
+        self.execute_sql_query(query)
+        return
+
+    def insert_in_db_table(self):
+        query = 'INSERT INTO {} (\n'.format(self.table_name)
+        query +='pmid,\n'
+        query +='pmcid\n'
+        query +=')\n' 
+        query +='VALUES '
+        rows = []
+        for pmid, pmcid in zip(self.oa_table['pmid'], self.oa_table['pmcid']):
+           rows.append('({}, {})'.format(pmid.replace('PMID:', ''), pmcid.replace('PMC', '')))
+        query += ',\n'.join(rows)
+        query +='\nON CONFLICT (pmid) DO NOTHING;'
+        self.execute_sql_query(query)
         return
