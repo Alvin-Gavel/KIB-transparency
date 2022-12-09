@@ -150,7 +150,8 @@ connection$methods(
     }
   },
   write_transparency_to_database = function(transparency_frame) {
-    preamble <- paste0('INSERT INTO ', table_name, ' (pmid,
+    preamble <- paste0('INSERT INTO ', table_name, ' (
+     pmid,
      pmcid,
      research_article,
      review_article,
