@@ -61,17 +61,6 @@ class open_access_table:
             conn.close()
         return
 
-    def create_db_table(self):
-        """
-        Do not use this just now. I may take both it and the corresponding function in the R code out.
-        """
-        query = 'CREATE TABLE {} (\n'.format(self.table_name)
-        query +='pmid int NOT NULL PRIMARY KEY,\n'
-        query +='pmcid int NOT NULL\n'
-        query +=')\n'
-        self.execute_sql_query(query)
-        return
-
     def insert_in_db_table(self):
         query = 'INSERT INTO {} (\n'.format(self.table_name)
         query +='pmid,\n'

@@ -131,24 +131,6 @@ connection <- setRefClass('connection',
 )
 
 connection$methods(
-  create_table_in_database = function() {
-    statement <- paste0('CREATE TABLE ', table_name, ' (
-     pmid int NOT NULL PRIMARY KEY,
-     pmcid int NOT NULL,
-     research_article bool NOT NULL,
-     review_article bool NOT NULL,
-     open_data bool NOT NULL,
-     open_code bool NOT NULL,
-     coi_pred bool NOT NULL,
-     fund_pred bool NOT NULL,
-     register_pred bool NOT NULL
-  )')
-    
-    if (!(dbExistsTable(database_connection, name=table_name))) {
-      print('Creating table...')
-      rs <- dbSendStatement(database_connection, statement)
-    }
-  },
   write_transparency_to_database = function(transparency_frame) {
     preamble <- paste0('INSERT INTO ', table_name, ' (
      pmid,
