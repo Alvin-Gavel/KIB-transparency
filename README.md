@@ -26,4 +26,4 @@ It is important to note that while the code searches articles for claims about t
 
 Both `KI-transparent` itself and `rtransparent` also use a number of other R libraries. Most can be installed simply through `packages.install(library name)`, but specifically `crminer` can be slightly hard to get hold of. As of December 2nd 2022, the package has been taken down from CRAN, but the most recent version can still be downloaded from the archive.
 
-`KI-transparent` is based on code written by Emmanual Zavalis, which can be be found in the repository https://github.com/zavalis/autotransparent.
+`KI-transparent` is based on code written by Emmanuel Zavalis, which can be be found in the repository https://github.com/zavalis/autotransparent.
