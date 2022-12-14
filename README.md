@@ -18,7 +18,7 @@ The purpose of the code in this repository is for use by Karolinska Institutet (
 
 `register_pred`: Whether the research protocol is pre-registered
 
-There are also functions for appending the dataframe to a SQL table, and creating the table if necessary.
+There are also functions for appending the dataframe to a SQL table.
 
 It is important to note that while the code searches articles for claims about transparency, it cannot verify that any of the claims are *true*. It is entirely possible that an article that claims to provide access to data actually only contains a dead link.
 
