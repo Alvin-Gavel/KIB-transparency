@@ -36,7 +36,10 @@ class open_access_table:
 
     def read_file_list(self):
         colnames = ['gz_file', 'citation', 'pmcid', 'pmid', 'rights']
-        self.oa_table = pd.read_csv(self.filename, sep='\t', skiprows=1, names=colnames)
+        raw_table = pd.read_csv(self.filename, sep='\t', skiprows=1, names=colnames, converters = {'pmcid': str, 'pmid':str})
+        self.oa_table = raw_table.astype(str)
+        # I am assured that this is the simultaneously 'pythonic' and 'pandorable' way of removing empty entries
+        self.oa_table = self.oa_table[self.oa_table['pmid'].astype(bool)]
         return
 
     def execute_sql_query(self, query):
@@ -44,11 +47,12 @@ class open_access_table:
         Code courtesy of https://www.postgresqltutorial.com/postgresql-python/create-tables/
         """
         conn = ps.connect(host = self.config['host'],
-                                database = self.config['db'],
+                                database = self.config['database'],
                                 user = self.config['user'],
-                                password = self.config['pwd'])        
+                                password = self.config['password'],
+                                port = self.config['port'])        
         try:
-            params = config()
+            params = self.config
             conn = ps.connect(**params)
             cur = conn.cursor()
             cur.execute(query)
