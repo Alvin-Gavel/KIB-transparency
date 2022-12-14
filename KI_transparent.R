@@ -65,7 +65,7 @@ batch$methods(
       for (i in 1:n_remaining) {
         tryCatch(metareadr::mt_read_pmcoa(remaining[i],file_name=filenames[i]),
                  error = function(e) {
-                   print(paste0('Problem with download of ', file_name, ', skipping for now...'))
+                   print(paste0('Problem with download of ', filenames[i], ', skipping for now...'))
                  }
         )
       }
