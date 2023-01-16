@@ -20,8 +20,9 @@ class open_access_table:
 
     def configure(self):
         """
-        Code courtesy of https://www.postgresqltutorial.com/postgresql-python/connect/
+        Reads the .config file necessary to access the database.
         """
+        # Code courtesy of https://www.postgresqltutorial.com/postgresql-python/connect/
         parser = ConfigParser()
         parser.read(self.config_path)
 
@@ -31,10 +32,16 @@ class open_access_table:
         return config
 
     def get_file_list(self):
+        """
+        Downloads the list of open access files on Pubmed Central.
+        """
         wget.download(self.link)
         return
 
     def read_file_list(self):
+        """
+        Reads a downloaded file of open access files on Pubmed Central.
+        """
         colnames = ['gz_file', 'citation', 'pmcid', 'pmid', 'rights']
         raw_table = pd.read_csv(self.filename, sep='\t', skiprows=1, names=colnames, converters = {'pmcid': str, 'pmid':str})
         self.oa_table = raw_table.astype(str)
@@ -44,8 +51,10 @@ class open_access_table:
 
     def execute_sql_query(self, query):
         """
-        Code courtesy of https://www.postgresqltutorial.com/postgresql-python/create-tables/
+        Execute some arbitrary SQL query to the database specified
+        in the .config file.
         """
+        # Code courtesy of https://www.postgresqltutorial.com/postgresql-python/create-tables/
         conn = ps.connect(host = self.config['host'],
                                 database = self.config['database'],
                                 user = self.config['user'],
@@ -66,6 +75,9 @@ class open_access_table:
         return
 
     def insert_in_db_table(self):
+        """
+        Creates a table of pmids and pmcids
+        """
         query = 'INSERT INTO {} (\n'.format(self.table_name)
         query +='pmid,\n'
         query +='pmcid\n'
