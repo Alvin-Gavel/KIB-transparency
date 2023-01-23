@@ -41,14 +41,14 @@ analysisBatch$methods(
     }
     dir.create('Publications', showWarnings = FALSE)
     dir.create('Full_tables', showWarnings = FALSE)
-    dir.create(paste0('Publications/Batch_', batchName), showWarnings = FALSE)
-    dir.create(paste0('Full_tables/Batch_', batchName), showWarnings = FALSE)
+    dir.create(paste0('Publications/', batchName), showWarnings = FALSE)
+    dir.create(paste0('Full_tables/', batchName), showWarnings = FALSE)
     if (verbose) {
       print('Done!')
     }
   },
   downloadPublicationData = function() {
-    alreadyDownloaded <- list.files(paste0('Publications/Batch_', batchName, '/'), pattern='*.xml', all.files=FALSE, full.names=FALSE)
+    alreadyDownloaded <- list.files(paste0('Publications/', batchName, '/'), pattern='*.xml', all.files=FALSE, full.names=FALSE)
     alreadyDownloaded <- str_remove(alreadyDownloaded,'PMC')
     alreadyDownloaded <- str_remove(alreadyDownloaded,'.xml')
     
@@ -61,7 +61,7 @@ analysisBatch$methods(
       if (verbose) {
         print(paste0('Downloading ', nRemaining , ' files of publication data...'))
       }
-      filenames <- paste0('Publications/Batch_', batchName, '/PMC',as.character(remaining),'.xml')
+      filenames <- paste0('Publications/', batchName, '/PMC',as.character(remaining),'.xml')
       for (i in 1:nRemaining) {
         tryCatch(metareadr::mt_read_pmcoa(remaining[i],file_name=filenames[i]),
                  error = function(e) {
@@ -77,7 +77,7 @@ analysisBatch$methods(
     }
   },
   evaluateTransparency = function() {
-    filePath <- paste0('Publications/Batch_', batchName, '/')
+    filePath <- paste0('Publications/', batchName, '/')
     fileList <- as.list(list.files(filePath, pattern='*.xml', all.files=FALSE, full.names=FALSE))
     fileList <- paste0(filePath, fileList)
     
@@ -91,7 +91,7 @@ analysisBatch$methods(
     otherTransparency <- foreach::foreach(x = fileList,.combine='rbind.fill') %dopar%{rtransparent::rt_all_pmc(x)}
     
     transparencyTable <- merge(codeTransparency, otherTransparency,by=c('pmid', 'pmcid_pmc', 'pmcid_uid', 'doi', 'filename', 'is_research', 'is_review', 'is_success'))
-    write.csv(transparencyTable, paste0('Full_tables/Batch_', batchName, '/Transparency.csv'), row.names = FALSE)
+    write.csv(transparencyTable, paste0('Full_tables/', batchName, '/Transparency.csv'), row.names = FALSE)
     
     transparencyFrame <- data.frame(c(transparencyTable['pmid'],
                                       transparencyTable['pmcid_uid'],
@@ -135,7 +135,7 @@ fullAnalysis <- setRefClass('batch',
 )
 
 fullAnalysis$methods(
-  initialize = function(analysisName, pmcids, nCores = 0, batchSize = 1, verbose = FALSE) {
+  initialize = function(analysisName, pmcids, nCores = 0, batchSize = 0, verbose = FALSE) {
     analysisName <<- analysisName
     pmcids <<- pmcids
     if (nCores == 0) {
@@ -143,11 +143,17 @@ fullAnalysis$methods(
     } else {
       nCores <<- nCores
     }
-    batchSize <<- batchSize
+    if (batchSize == 0) {
+      batchSize <<- length(pmcids)
+    } else {
+      batchSize <<- batchSize
+    }
     verbose <<- verbose
   },
   runBatch = function(i) {
     pmcidBatch <- pmcids[batchSize * (i - 1) + 1: batchSize]
+    # This handles the case of running over the end on the last batch. There is probably some neater way to do it.
+    pmcidBatch <- pmcidBatch[!is.na(pmcidBatch)]
     batchI <- analysisBatch(paste0(analysisName, i), pmcidBatch, nCores = nCores, verbose = verbose)
     return(batchI$run())
   }
