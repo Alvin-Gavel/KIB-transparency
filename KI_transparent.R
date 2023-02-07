@@ -17,6 +17,52 @@
   library(RPostgres)
 }
 
+connection <- setRefClass('connection',
+                          fields = list(tableName = 'character',
+                                        databaseConnection = 'DBIConnection')
+)
+
+connection$methods(
+  writeTransparencyToDatabase = function(transparencyFrame) {
+    preamble <- paste0('INSERT INTO ', tableName, ' (
+      pmid,
+      pmcid,
+      research_article,
+      review_article,
+      open_data,
+      open_code,
+      coi_pred,
+      fund_pred,
+      register_pred
+    ) 
+    VALUES ')
+    rows <- c()
+    addedAnything <- FALSE
+    exampleInvalidRow <- ''
+    for(i in 1:nrow(transparencyFrame)){
+      entry <- transparencyFrame[i,]
+      # We have run into a couple of cases of pmids being empty
+      if (entry[1] != '') {
+        row <- paste0('(', paste0(entry,collapse=','), ')')
+        if (!(grepl('NA', row))) {
+          rows <- append(rows, row)
+          addedAnything <- TRUE
+        } else {
+          exampleInvalidRow <- row
+        }
+      }
+    }
+    finish <- '\nON CONFLICT (pmid) DO NOTHING;'
+    statement <- paste0(preamble, paste(rows,collapse=',\n'), finish)
+    if (addedAnything) {
+      rs <- dbGetQuery(databaseConnection, statement)
+    } else {
+      print('After removing invalid entries, nothing was left!')
+      print('Example invalid row:')
+      print(exampleInvalidRow)
+    }
+  })
+
 analysisBatch <- setRefClass('analysisBatch',
                              fields = list(batchName = 'character',
                                            pmcids = 'character',
@@ -128,6 +174,9 @@ analysisBatch$methods(
 fullAnalysis <- setRefClass('batch',
                             fields = list(analysisName = 'character',
                                           pmcids = 'character',
+                                          nFiles = 'numeric',
+                                          tableName = 'character',
+                                          databaseConnection = 'DBIConnection',
                                           nCores = 'numeric',
                                           batchSize = 'numeric',
                                           verbose = 'logical',
@@ -135,9 +184,12 @@ fullAnalysis <- setRefClass('batch',
 )
 
 fullAnalysis$methods(
-  initialize = function(analysisName, pmcids, nCores = 0, batchSize = 0, verbose = FALSE) {
+  initialize = function(analysisName, pmcids, tableName, databaseConnection, nCores = 0, batchSize = 0, verbose = FALSE) {
     analysisName <<- analysisName
     pmcids <<- pmcids
+    tableName <<- tableName
+    databaseConnection <<- databaseConnection
+    nFiles <<- length(pmcids)
     if (nCores == 0) {
       nCores <<- detectCores() - 2
     } else {
@@ -156,40 +208,29 @@ fullAnalysis$methods(
     pmcidBatch <- pmcidBatch[!is.na(pmcidBatch)]
     batchI <- analysisBatch(paste0(analysisName, i), pmcidBatch, nCores = nCores, verbose = verbose)
     return(batchI$run())
+  },
+  run = function() {
+    if (verbose) {
+      print(paste0("Has ", nFiles, " pmcids to run"))
+      print("Checking what Pubmed Central ids are already in our database...")
+    }
+    already_analysed <- dbGetQuery(databaseConnection, paste0("select at.pmcid 
+from ", tableName, " at"))
+    
+    nFull <- length(pmcids)
+    pmcids <<- setdiff(pmcids, already_analysed$pmcid)
+    nFiles <<- length(pmcids)
+    if (verbose) {
+      print(paste0("There are ", nFull - nFiles, " already in the database"))
+      print(paste0("There are ", nFiles, " left to analyse"))
+    }
+    for (i in 1:ceiling(nFiles/batchSize)) {
+      if (verbose) {
+        print(paste0("Starting on batch ", i))
+      }
+      transparencyFrame <- runBatch(i)
+      kibTable <- connection(tableName = tableName, databaseConnection = databaseConnection)
+      kibTable$writeTransparencyToDatabase(transparencyFrame)
+    }
   }
 )
-
-connection <- setRefClass('connection',
-                          fields = list(tableName = 'character',
-                                        databaseConnection = 'DBIConnection')
-)
-
-connection$methods(
-  writeTransparencyToDatabase = function(transparencyFrame) {
-    preamble <- paste0('INSERT INTO ', tableName, ' (
-      pmid,
-      pmcid,
-      research_article,
-      review_article,
-      open_data,
-      open_code,
-      coi_pred,
-      fund_pred,
-      register_pred
-    ) 
-    VALUES ')
-    rows <- c()
-    for(i in 1:nrow(transparencyFrame)){
-      entry <- transparencyFrame[i,]
-      # We have run into a couple of cases of pmids being empty
-      if (entry[1] != '') {
-        row <- paste0('(', paste0(entry,collapse=','), ')')
-        if (!(grepl('NA', row))) {
-          rows <- append(rows, row)
-        }
-      }
-    }
-    finish <- '\nON CONFLICT (pmid) DO NOTHING;'
-    statement <- paste0(preamble, paste(rows,collapse=',\n'), finish)
-    rs <- dbGetQuery(databaseConnection, statement)
-  })
