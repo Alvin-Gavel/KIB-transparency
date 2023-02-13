@@ -64,15 +64,18 @@ connection$methods(
   })
 
 analysisBatch <- setRefClass('analysisBatch',
-                             fields = list(batchName = 'character',
+                             fields = list(analysisName = 'character',
+                                           batchNumber = 'numeric',
+                                           batchName = 'character',
                                            pmcids = 'character',
                                            nCores = 'numeric',
                                            verbose = 'logical')
 )
 
 analysisBatch$methods(
-  initialize = function(batchName, pmcids, nCores = 0, verbose = FALSE) {
-    batchName <<- batchName
+  initialize = function(analysisName, batchNumber, pmcids, nCores = 0, verbose = FALSE) {
+    analysisName <<- analysisName
+    batchNumber <<- batchNumber
     pmcids <<- pmcids
     if (nCores == 0) {
       nCores <<- detectCores() - 2
@@ -87,43 +90,43 @@ analysisBatch$methods(
     }
     dir.create('Publications', showWarnings = FALSE)
     dir.create('Full_tables', showWarnings = FALSE)
-    dir.create(paste0('Publications/', batchName), showWarnings = FALSE)
-    dir.create(paste0('Full_tables/', batchName), showWarnings = FALSE)
+    dir.create(paste0('Publications/', analysisName), showWarnings = FALSE)
+    dir.create(paste0('Full_tables/', analysisName), showWarnings = FALSE)
+    dir.create(paste0('Publications/', analysisName, '/', batchNumber), showWarnings = FALSE)
+    dir.create(paste0('Full_tables/', analysisName, '/', batchNumber), showWarnings = FALSE)
+    if (verbose) {
+      print('Done!')
+    }
+  },
+  cleanUpDirectories = function() {
+    if (verbose) {
+      print('Cleaning up directories...')
+    }
+    unlink(paste0('Publications/', analysisName, '/', batchNumber), recursive=TRUE)
+    unlink(paste0('Full_tables/', analysisName, '/', batchNumber), recursive=TRUE)
     if (verbose) {
       print('Done!')
     }
   },
   downloadPublicationData = function() {
-    alreadyDownloaded <- list.files(paste0('Publications/', batchName, '/'), pattern='*.xml', all.files=FALSE, full.names=FALSE)
-    alreadyDownloaded <- str_remove(alreadyDownloaded,'PMC')
-    alreadyDownloaded <- str_remove(alreadyDownloaded,'.xml')
-    
-    # setdiff is asymmetric, so it's not a problem if the Publications
-    # directory contains additional files not covered by pmcids
-    remaining <- setdiff(pmcids, alreadyDownloaded)
-    nRemaining <- length(remaining)
-    
-    if (nRemaining > 0) {
-      if (verbose) {
-        print(paste0('Downloading ', nRemaining , ' files of publication data...'))
-      }
-      filenames <- paste0('Publications/', batchName, '/PMC',as.character(remaining),'.xml')
-      for (i in 1:nRemaining) {
-        tryCatch(metareadr::mt_read_pmcoa(remaining[i],file_name=filenames[i]),
-                 error = function(e) {
-                   print(paste0('Problem with download of ', filenames[i], ', skipping for now...'))
-                 }
-        )
-      }
-      if (verbose) {
-        print('Done!')
-      }
-    } else {
-      print('No additional files to load!')
+    nPmcids <- length(pmcids)
+    if (verbose) {
+      print(paste0('Downloading ', nPmcids , ' files of publication data...'))
+    }
+    filenames <- paste0('Publications/', analysisName, '/', batchNumber, '/PMC',as.character(pmcids),'.xml')
+    for (i in 1:nPmcids) {
+      tryCatch(metareadr::mt_read_pmcoa(pmcids[i],file_name=filenames[i]),
+               error = function(e) {
+                 print(paste0('Problem with download of ', filenames[i], ', skipping for now...'))
+               }
+      )
+    }
+    if (verbose) {
+      print('Done!')
     }
   },
   evaluateTransparency = function() {
-    filePath <- paste0('Publications/', batchName, '/')
+    filePath <- paste0('Publications/', analysisName, '/', batchNumber, '/')
     fileList <- as.list(list.files(filePath, pattern='*.xml', all.files=FALSE, full.names=FALSE))
     fileList <- paste0(filePath, fileList)
     
@@ -133,22 +136,40 @@ analysisBatch$methods(
     }
     registerDoParallel(cores=nCores)
     
+    if (verbose) {
+      print('Evaluating code transparency...')
+    }
     codeTransparency <- foreach::foreach(x = fileList,.combine='rbind.fill') %dopar%{rtransparent::rt_data_code_pmc(x)}
+    
+    if (verbose) {
+      print('Evaluating other transparency...')
+    }
     otherTransparency <- foreach::foreach(x = fileList,.combine='rbind.fill') %dopar%{rtransparent::rt_all_pmc(x)}
     
     transparencyTable <- merge(codeTransparency, otherTransparency,by=c('pmid', 'pmcid_pmc', 'pmcid_uid', 'doi', 'filename', 'is_research', 'is_review', 'is_success'))
     write.csv(transparencyTable, paste0('Full_tables/', batchName, '/Transparency.csv'), row.names = FALSE)
     
-    transparencyFrame <- data.frame(c(transparencyTable['pmid'],
-                                      transparencyTable['pmcid_uid'],
-                                      transparencyTable['is_research'],
-                                      transparencyTable['is_review'],
-                                      transparencyTable['is_open_data'],
-                                      transparencyTable['is_open_code'],
-                                      transparencyTable['is_coi_pred'],
-                                      transparencyTable['is_fund_pred'],
-                                      transparencyTable['is_register_pred']))
-    
+    # Check that anything at all was returned by both functions
+    if (("is_open_data" %in% colnames(transparencyTable)) & ("is_coi_pred" %in% colnames(transparencyTable))) {
+      transparencyFrame <- data.frame(c(transparencyTable['pmid'],
+                                        transparencyTable['pmcid_uid'],
+                                        transparencyTable['is_research'],
+                                        transparencyTable['is_review'],
+                                        transparencyTable['is_open_data'],
+                                        transparencyTable['is_open_code'],
+                                        transparencyTable['is_coi_pred'],
+                                        transparencyTable['is_fund_pred'],
+                                        transparencyTable['is_register_pred']))
+      if (verbose) {
+        print('Done!')
+      }
+    } else {
+      transparencyFrame <- data.frame(matrix(nrow = 0, ncol = 9))
+      if (verbose) {
+        print('Failed at producing any values!')
+        print('Returning dummy dataframe instead')
+      }
+    }
     colnames(transparencyFrame) <- c('pmid',
                                      'pmcid',
                                      'research_article',
@@ -158,15 +179,15 @@ analysisBatch$methods(
                                      'coi_pred',
                                      'fund_pred',
                                      'register_pred')
-    if (verbose) {
-      print('Done!')
-    }
     return(transparencyFrame)
   },
   run = function() {
+    cleanUpDirectories()
     createNecessaryDirectories()
     downloadPublicationData()
-    return(evaluateTransparency())
+    results <- evaluateTransparency()
+    cleanUpDirectories()
+    return(results)
   }
 )
 
@@ -206,7 +227,7 @@ fullAnalysis$methods(
     pmcidBatch <- pmcids[batchSize * (i - 1) + 1: batchSize]
     # This handles the case of running over the end on the last batch. There is probably some neater way to do it.
     pmcidBatch <- pmcidBatch[!is.na(pmcidBatch)]
-    batchI <- analysisBatch(paste0(analysisName, i), pmcidBatch, nCores = nCores, verbose = verbose)
+    batchI <- analysisBatch(analysisName, i, pmcidBatch, nCores = nCores, verbose = verbose)
     return(batchI$run())
   },
   run = function() {
@@ -229,8 +250,10 @@ from ", tableName, " at"))
         print(paste0("Starting on batch ", i))
       }
       transparencyFrame <- runBatch(i)
-      kibTable <- connection(tableName = tableName, databaseConnection = databaseConnection)
-      kibTable$writeTransparencyToDatabase(transparencyFrame)
+      if (nrow(transparencyFrame) > 0) {
+        kibTable <- connection(tableName = tableName, databaseConnection = databaseConnection)
+        kibTable$writeTransparencyToDatabase(transparencyFrame)
+      }
     }
   }
 )
